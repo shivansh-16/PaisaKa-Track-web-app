@@ -1,103 +1,228 @@
-import Image from "next/image";
+'use client';
+
+import { useAuth } from '@/context/AuthContext';
+import { useExpenses } from '@/context/ExpenseContext';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const { user, isLoading: authLoading } = useAuth();
+  const { expenses, groups, getTotalBalance, getMonthlySpending, isLoading: expenseLoading } = useExpenses();
+  const router = useRouter();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/welcome');
+    }
+  }, [user, authLoading, router]);
+
+  if (authLoading || expenseLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--pk-bg)' }}>
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p style={{ color: 'var(--pk-text-secondary)' }}>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  const totalBalance = getTotalBalance();
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const monthlySpending = getMonthlySpending(currentMonth, currentYear);
+  const recentExpenses = expenses
+    .filter(expense => expense.amount < 0)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 4);
+  return (
+    <div className="min-h-screen" style={{ background: 'var(--pk-bg)' }}>
+      {/* Header */}
+      <header className="flex items-center justify-between px-4 py-4 bg-white shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold" style={{ background: 'var(--pk-orange)' }}>
+            ₹
+          </div>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--pk-text-primary)' }}>PaisaKa Track</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <button 
+            aria-label="Notifications" 
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            🔔
+          </button>
+          <a 
+            href="/profile"
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
           >
-            Read our docs
+            👤
           </a>
         </div>
+      </header>
+
+      <main className="px-4 py-6 space-y-6">
+        {/* Total Balance Card */}
+        <section className="relative overflow-hidden rounded-2xl p-6 text-white" style={{ background: 'linear-gradient(135deg, var(--pk-orange) 0%, #ff6b35 100%)' }}>
+          <div className="relative z-10">
+            <div className="text-sm opacity-90 mb-2">Total Balance</div>
+            <div className="text-4xl font-bold mb-2">₹{Math.abs(totalBalance).toLocaleString()}</div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="flex items-center gap-1">
+                <span>{totalBalance >= 0 ? '↗️' : '↘️'}</span>
+                <span>{totalBalance >= 0 ? '+' : '-'}₹{Math.abs(monthlySpending)} this month</span>
+              </span>
+            </div>
+          </div>
+          <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
+            <div className="w-full h-full rounded-full" style={{ background: 'white' }}></div>
+          </div>
+        </section>
+
+        {/* Quick Action Buttons */}
+        <section className="grid grid-cols-2 gap-4">
+          <a href="/expenses/add" className="pk-button-primary h-20 flex flex-col items-center justify-center gap-2">
+            <div className="text-2xl">➕</div>
+            <div className="text-sm font-medium">Add Expense</div>
+          </a>
+          <button className="h-20 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2" style={{ borderColor: 'var(--pk-orange)', background: 'white' }}>
+            <div className="text-2xl">🎤</div>
+            <div className="text-sm font-medium" style={{ color: 'var(--pk-orange)' }}>Voice Add</div>
+          </button>
+        </section>
+
+        {/* Recent Expenses */}
+        <section className="pk-card">
+          <h2 className="pk-section-title mb-4">Recent Expenses</h2>
+          <div className="space-y-4">
+            {recentExpenses.length > 0 ? (
+              recentExpenses.map((expense) => {
+                const categoryEmojis: { [key: string]: string } = {
+                  'Food': '🍕',
+                  'Transport': '🚗',
+                  'Tea': '☕',
+                  'Movies': '🎬',
+                  'Medical': '🏥',
+                  'Shopping': '🛒',
+                  'Clothes': '👕',
+                  'Bills': '💡',
+                  'Education': '🎓',
+                };
+                
+                const emoji = categoryEmojis[expense.category] || '💰';
+                const time = new Date(expense.date).toLocaleTimeString('en-US', { 
+                  hour: 'numeric', 
+                  minute: '2-digit',
+                  hour12: true 
+                });
+                
+                return (
+                  <div key={expense.id} className="flex items-center justify-between py-3">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--pk-bg)' }}>
+                        {emoji}
+                      </div>
+                      <div>
+                        <div className="font-medium" style={{ color: 'var(--pk-text-primary)' }}>
+                          {expense.description || expense.category}
+                        </div>
+                        <div className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>{time}</div>
+                      </div>
+                    </div>
+                    <div className="pk-amount" style={{ color: 'var(--pk-red)' }}>
+                      -₹{Math.abs(expense.amount).toLocaleString()}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-center py-8" style={{ color: 'var(--pk-text-secondary)' }}>
+                <div className="text-4xl mb-2">📝</div>
+                <p>No expenses yet</p>
+                <p className="text-sm">Add your first expense to get started!</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Active Groups */}
+        <section className="pk-card">
+          <h2 className="pk-section-title mb-4">Active Groups</h2>
+          <div className="space-y-3">
+            {groups.length > 0 ? (
+              groups.slice(0, 2).map((group) => {
+                const groupEmojis: { [key: string]: string } = {
+                  'Ganesh Festival': '🎉',
+                  'Room Expenses': '🏠',
+                  'Wedding': '💒',
+                  'Trip': '✈️',
+                  'Office': '🏢',
+                };
+                
+                const emoji = groupEmojis[group.name] || '👥';
+                const remainingBalance = group.totalFund - group.totalSpent;
+                
+                return (
+                  <div key={group.id} className="flex items-center justify-between py-3 px-4 rounded-xl" style={{ background: 'var(--pk-bg)' }}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--pk-orange)' }}>
+                        {emoji}
+                      </div>
+                      <div>
+                        <div className="font-medium" style={{ color: 'var(--pk-text-primary)' }}>{group.name}</div>
+                        <div className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>
+                          {group.members.length} members
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="pk-amount" style={{ color: 'var(--pk-green)' }}>
+                        ₹{remainingBalance.toLocaleString()}
+                      </div>
+                      <div className="text-xs" style={{ color: 'var(--pk-text-secondary)' }}>
+                        remaining
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-center py-8" style={{ color: 'var(--pk-text-secondary)' }}>
+                <div className="text-4xl mb-2">👥</div>
+                <p>No groups yet</p>
+                <p className="text-sm">Create or join a group to get started!</p>
+              </div>
+            )}
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-2" style={{ borderColor: 'var(--pk-border)' }}>
+        <div className="flex items-center justify-around">
+          <a href="/" className="flex flex-col items-center gap-1 py-2 px-4" style={{ color: 'var(--pk-orange)' }}>
+            <div className="text-xl">🏠</div>
+            <div className="text-xs font-medium">Home</div>
+          </a>
+          <a href="/dashboard/analytics" className="flex flex-col items-center gap-1 py-2 px-4" style={{ color: 'var(--pk-text-secondary)' }}>
+            <div className="text-xl">📊</div>
+            <div className="text-xs font-medium">Analytics</div>
+          </a>
+          <a href="/groups" className="flex flex-col items-center gap-1 py-2 px-4" style={{ color: 'var(--pk-text-secondary)' }}>
+            <div className="text-xl">👥</div>
+            <div className="text-xs font-medium">Groups</div>
+          </a>
+          <a href="/profile" className="flex flex-col items-center gap-1 py-2 px-4" style={{ color: 'var(--pk-text-secondary)' }}>
+            <div className="text-xl">👤</div>
+            <div className="text-xs font-medium">Profile</div>
+          </a>
+        </div>
+      </nav>
     </div>
   );
 }
+

@@ -1,26 +1,158 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary Color Palette */
+  --pk-green: #10B981;      /* Emerald-500 - Savings, positive actions, success states */
+  --pk-red: #EF4444;        /* Red-500 - Spending, alerts, negative balances */
+  --pk-orange: #F59E0B;     /* Amber-500 - Pending payments, warnings */
+  --pk-blue: #3B82F6;       /* Blue-500 - Information, help sections */
+  --pk-gold: #FFD700;       /* Golden - Premium features, achievements */
+  
+  /* Secondary Colors */
+  --pk-bg: #F9FAFB;         /* Gray-50 - Main app background */
+  --pk-card: #FFFFFF;       /* Card backgrounds */
+  --pk-text-primary: #111827; /* Gray-900 - Main text */
+  --pk-text-secondary: #6B7280; /* Gray-500 - Supporting text */
+  --pk-border: #E5E7EB;     /* Gray-200 - Card borders */
+  
+  /* Cultural Colors */
+  --pk-saffron: #FF9933;    /* Festival themes, cultural elements */
+  --pk-indian-green: #138808; /* Alternative success color */
+  --pk-rupee-gold: #FFD700; /* Currency highlights, special occasions */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-pk-green: var(--pk-green);
+  --color-pk-red: var(--pk-red);
+  --color-pk-orange: var(--pk-orange);
+  --color-pk-blue: var(--pk-blue);
+  --color-pk-gold: var(--pk-gold);
+  --color-pk-bg: var(--pk-bg);
+  --color-pk-card: var(--pk-card);
+  --color-pk-text-primary: var(--pk-text-primary);
+  --color-pk-text-secondary: var(--pk-text-secondary);
+  --color-pk-border: var(--pk-border);
+  --color-pk-saffron: var(--pk-saffron);
+  --color-pk-indian-green: var(--pk-indian-green);
+  --color-pk-rupee-gold: var(--pk-rupee-gold);
+  --font-sans: var(--font-inter);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--pk-bg);
+  color: var(--pk-text-primary);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* Utility classes */
+.pk-card {
+  background: var(--pk-card);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--pk-border);
+  padding: 16px;
+}
+
+.pk-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--pk-text-primary);
+}
+
+.pk-rupee {
+  color: var(--pk-rupee-gold);
+  font-weight: 700;
+}
+
+.pk-amount {
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--pk-text-primary);
+}
+
+.pk-amount-large {
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--pk-text-primary);
+}
+
+.pk-button-primary {
+  background: var(--pk-green);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-weight: 600;
+  font-size: 16px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.pk-button-primary:hover {
+  background: #059669;
+  transform: scale(0.98);
+}
+
+.pk-button-secondary {
+  background: var(--pk-blue);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-weight: 600;
+  font-size: 16px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.pk-button-secondary:hover {
+  background: #2563eb;
+  transform: scale(0.98);
+}
+
+.pk-button-warning {
+  background: var(--pk-orange);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-weight: 600;
+  font-size: 16px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.pk-button-warning:hover {
+  background: #d97706;
+  transform: scale(0.98);
+}
+
+.pk-button-danger {
+  background: var(--pk-red);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-weight: 600;
+  font-size: 16px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.pk-button-danger:hover {
+  background: #dc2626;
+  transform: scale(0.98);
 }

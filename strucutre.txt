@@ -1,0 +1,92 @@
+paisaka-track-app/
+├── app/                          # App Router directory, main feature colocation
+│   ├── layout.tsx                # Root layout for all pages
+│   ├── globals.css
+│   ├── page.tsx                  # Root/home dashboard page
+│   ├── (auth)/                   # Route group - Auth flows
+│   │   ├── login/
+│   │   │   └── page.tsx
+│   │   ├── signup/
+│   │   │   └── page.tsx
+│   │   └── layout.tsx
+│   ├── dashboard/
+│   │   ├── page.tsx
+│   │   ├── loading.tsx
+│   │   ├── error.tsx
+│   │   └── (analytics)/
+│   │       └── page.tsx
+│   ├── expenses/
+│   │   ├── page.tsx
+│   │   ├── add/
+│   │   │   └── page.tsx
+│   │   └── [id]/
+│   │       ├── page.tsx
+│   │       └── edit/
+│   │           └── page.tsx
+│   ├── groups/
+│   │   ├── page.tsx
+│   │   ├── create/
+│   │   │   └── page.tsx
+│   │   └── [groupId]/
+│   │       ├── page.tsx
+│   │       └── expenses/
+│   │           ├── page.tsx
+│   │           └── add/
+│   │               └── page.tsx
+│   │       └── split/
+│   │           └── [expenseId]/
+│   │               └── page.tsx
+│   │       └── settings/
+│   │           └── page.tsx
+│   ├── api/                      # API routes for server functions
+│   │   ├── auth/
+│   │   │   └── route.ts
+│   │   ├── expenses/
+│   │   │   ├── route.ts
+│   │   │   └── [id]/route.ts
+│   │   ├── groups/
+│   │   │   ├── route.ts
+│   │   │   └── [groupId]/route.ts
+│   │   └── user/
+│   │       └── route.ts
+│   ├── profile/
+│   │   ├── page.tsx
+│   │   └── settings/
+│   │       └── page.tsx
+│   └── not-found.tsx
+│
+├── components/                   # Global, reusable components
+│   ├── ui/
+│   ├── forms/
+│   ├── layout/
+│   ├── common/
+│   └── (feature specific folders as needed)
+│
+├── lib/                          # Utilities, helpers, configs
+│   ├── db.ts
+│   ├── auth.ts
+│   ├── constants.ts
+│   ├── api-client.ts
+│   ├── date.ts
+│
+├── hooks/                        # Custom React hooks
+│   ├── useAuth.ts
+│   ├── useGroups.ts
+│   ├── useExpenses.ts
+│
+├── context/                      # Global context providers
+│   ├── AuthContext.tsx
+│   ├── ExpenseContext.tsx
+│   ├── ThemeContext.tsx
+│
+├── types/                        # TypeScript types (if used)
+│   ├── expense.ts
+│   ├── group.ts
+│   ├── user.ts
+│   ├── api.ts
+│
+├── styles/                       # CSS files (global, utility, feature-based)
+│   ├── globals.css
+│   ├── components.css
+│
+├── public/
