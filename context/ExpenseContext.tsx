@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuth } from './AuthContext';
 
 export interface Expense {
   id: string;
@@ -86,17 +87,81 @@ interface ExpenseContextType {
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
 
 export function ExpenseProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [splits, setSplits] = useState<Split[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load data from localStorage on app start
-    loadData();
+    // Initial load
+    hydrateFromCache();
   }, []);
 
-  const loadData = () => {
+  useEffect(() => {
+    const handler = () => void fetchExpensesFromApi();
+    window.addEventListener('expenses-changed', handler);
+    return () => window.removeEventListener('expenses-changed', handler);
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) { setIsLoading(false); return; }
+    fetchExpensesFromApi();
+    fetchGroupsFromApi();
+  }, [user]);
+
+  async function fetchExpensesFromApi() {
+    try {
+      if (!user) return;
+      setIsLoading(true);
+      const res = await fetch('/api/expenses', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to fetch expenses');
+      const data = await res.json();
+      const items = (data.items || []).map((t: any) => ({
+        id: String(t.id),
+        userId: user.id,
+        amount: t.type === 'expense' ? -Number(t.amount) : Number(t.amount),
+        category: String(t.category_id ?? 'Misc'),
+        description: t.note ?? undefined,
+        date: new Date(t.occurred_at),
+        isGroupExpense: false,
+        createdAt: new Date(t.created_at || t.occurred_at),
+        updatedAt: new Date(t.created_at || t.occurred_at),
+      } as Expense));
+      setExpenses(items);
+      localStorage.setItem('paisaka_expenses', JSON.stringify(items));
+    } catch (e) {
+      // fallback to cache already loaded
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function fetchGroupsFromApi() {
+    try {
+      if (!user) return;
+      const res = await fetch('/api/groups', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to fetch groups');
+      const data = await res.json();
+      const list = (data.items || []).map((g: any) => ({
+        id: String(g.id),
+        name: String(g.name),
+        description: g.description ?? undefined,
+        members: [],
+        totalFund: 0,
+        totalSpent: 0,
+        createdBy: '',
+        createdAt: new Date(g.created_at),
+        updatedAt: new Date(g.created_at),
+      } as Group));
+      setGroups(list);
+      localStorage.setItem('paisaka_groups', JSON.stringify(list));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  const hydrateFromCache = () => {
     try {
       const savedExpenses = localStorage.getItem('paisaka_expenses');
       const savedGroups = localStorage.getItem('paisaka_groups');
@@ -129,8 +194,8 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         }));
         setSplits(parsedSplits);
       }
-    } catch (error) {
-      console.error('Error loading data:', error);
+    } catch {
+      // ignore cache errors
     } finally {
       setIsLoading(false);
     }
@@ -155,7 +220,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Expense operations
+  // Expense operations (still local for now; server integration can be added)
   const addExpense = async (expenseData: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
     try {
       const newExpense: Expense = {
@@ -210,7 +275,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     return expenses.filter(expense => expense.category === category);
   };
 
-  // Group operations
+  // Group operations (still local)
   const createGroup = async (groupData: Omit<Group, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
     try {
       const newGroup: Group = {

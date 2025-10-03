@@ -78,7 +78,7 @@ body {
 }
 
 .pk-button-primary {
-  background: var(--pk-green);
+  background: var(--pk-saffron);
   color: white;
   border: none;
   border-radius: 12px;

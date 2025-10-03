@@ -1,15 +1,23 @@
+'use client';
+
+import Protected from '@/components/Protected';
+import { useLanguage } from '@/context/LanguageContext';
+
 export default function Profile() {
+  const { lang, setLang, T } = useLanguage();
   return (
+    <Protected>
     <div className="min-h-dvh px-4 py-6 sm:px-6 md:px-8" style={{ background: 'var(--pk-bg)' }}>
       {/* Header */}
       <header className="flex items-center justify-between mb-6">
         <a href="/" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
           ←
         </a>
-        <h1 className="text-xl font-bold" style={{ color: 'var(--pk-text-primary)' }}>Profile</h1>
-        <button className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
-          ⚙️
-        </button>
+        <h1 className="text-xl font-bold" style={{ color: 'var(--pk-text-primary)' }}>{T('welcome.title')}</h1>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setLang('hi')} className="p-2 rounded border" style={{ borderColor: 'var(--pk-border)' }}>हिं</button>
+          <button onClick={() => setLang('en')} className="p-2 rounded border" style={{ borderColor: 'var(--pk-border)' }}>EN</button>
+        </div>
       </header>
 
       <main className="space-y-6">
@@ -126,5 +134,6 @@ export default function Profile() {
         </section>
       </main>
     </div>
+    </Protected>
   );
 }

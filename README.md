@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PaisaKa Track - Web App
 
-## Getting Started
+## Local Setup
 
-First, run the development server:
-
+1. Copy `.env.example` to `.env.local` and fill values:
+   - `SUPABASE_PROJECT_URL`, `SUPABASE_ANON_KEY` (required to run)
+   - Optional: `SUPABASE_SERVICE_ROLE_KEY` for server tasks
+   - Keep `DEFAULT_TIMEZONE=Asia/Kolkata` and `DEFAULT_CURRENCY=INR`
+2. Install dependencies:
+   ```bash
+   npm ci
+   ```
+3. Run dev server:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   ```
+4. Open http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## CI
+GitHub Actions runs lint, tests, and build on PRs to `main`. Configure repo secrets:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Supabase Usage
+The Supabase client is exposed via:
+- `lib/db.ts` → `getBrowserSupabase()` and `getServerSupabase()`
+- `lib/auth.ts` → `getUserFromRequest()` and `requireUser()`
+- `lib/constants.ts` → environment-backed config (timezone, languages, limits)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Database & RLS (Supabase)
+Apply SQL in order using Supabase SQL editor:
+1. `supabase/schema.sql`
+2. `supabase/policies.sql`
+3. `supabase/seed.sql`
 
-## Learn More
+## Storage (Supabase)
+- Create bucket: `paisaka-receipts` (private)
+- Allowed types: image/jpeg, image/png, image/webp, application/pdf
+- API endpoints:
+  - `POST /api/files` → returns `{ path, signedUrl, token }` for direct upload
+  - `GET /api/files?path=...` → returns signed download URL
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
+- Vercel:
+  - Add env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - Add server env vars as needed: `SUPABASE_SERVICE_ROLE_KEY` (server-only)
+  - Set build command: `npm run build`; output: `.next`
+- Supabase: ensure RLS enabled; rotate keys before go-live
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Docs
+- See `docs/SETUP_SUPABASE.md` for backend setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Conventions
+- Timezone default: Asia/Kolkata
+- Supported languages: en, hi
+- Storage bucket: `paisaka-receipts`
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Next steps
+- Implement database schema and RLS in Supabase
+- Integrate auth routes and secure API handlers
+- Replace static data with live queries

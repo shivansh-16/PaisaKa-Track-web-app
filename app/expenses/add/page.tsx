@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useExpenses } from '@/context/ExpenseContext';
-import VoiceInput from '@/components/VoiceInput';
 
 export default function AddExpense() {
   const [formData, setFormData] = useState({
@@ -16,7 +14,6 @@ export default function AddExpense() {
   const [error, setError] = useState('');
   
   const { user } = useAuth();
-  const { addExpense } = useExpenses();
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,20 +43,20 @@ export default function AddExpense() {
     }
 
     try {
-      const success = await addExpense({
-        userId: user?.id || '',
-        amount: -Math.abs(parseFloat(formData.amount)), // Negative for expenses
-        category: formData.category,
-        description: formData.description,
-        date: new Date(),
-        isGroupExpense: false,
+      const payload = {
+        type: 'expense',
+        amount: Math.abs(parseFloat(formData.amount)),
+        category_id: null,
+        note: formData.description || null,
+        occurred_at: new Date().toISOString(),
+      };
+      const res = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
-
-      if (success) {
-        router.push('/');
-      } else {
-        setError('Failed to add expense. Please try again.');
-      }
+      if (!res.ok) throw new Error('Failed to save');
+      router.push('/');
     } catch (err) {
       setError('Failed to add expense. Please try again.');
     } finally {
@@ -152,14 +149,6 @@ export default function AddExpense() {
                 value={formData.description}
                 onChange={handleChange}
               />
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <VoiceInput 
-                  onTranscript={(text) => {
-                    setFormData(prev => ({ ...prev, description: text }));
-                  }}
-                  className="p-2"
-                />
-              </div>
             </div>
           </section>
 

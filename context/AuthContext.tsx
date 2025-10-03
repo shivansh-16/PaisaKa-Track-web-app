@@ -1,11 +1,11 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getBrowserSupabase } from '@/lib/db';
 
 interface User {
   id: string;
-  name: string;
-  email: string;
+  email: string | null;
   phone?: string;
   avatar?: string;
   createdAt: Date;
@@ -15,8 +15,8 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (userData: { name: string; email: string; phone: string; password: string }) => Promise<boolean>;
-  logout: () => void;
+  signup: (userData: { name?: string; email: string; phone?: string; password: string }) => Promise<{ ok: boolean; needsVerification?: boolean }>;
+  logout: () => Promise<void>;
   updateProfile: (userData: Partial<User>) => Promise<boolean>;
 }
 
@@ -27,96 +27,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session on app load
-    const savedUser = localStorage.getItem('paisaka_user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('Error parsing saved user:', error);
-        localStorage.removeItem('paisaka_user');
+    const supabase = getBrowserSupabase();
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) {
+        setUser({ id: data.user.id, email: data.user.email, createdAt: new Date(data.user.created_at) });
       }
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({ id: session.user.id, email: session.user.email, createdAt: new Date(session.user.created_at) });
+      } else {
+        setUser(null);
+      }
+    });
+    return () => { sub.subscription.unsubscribe(); };
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Simulate API call - replace with actual authentication
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock user data - replace with actual API response
-      const mockUser: User = {
-        id: '1',
-        name: 'Rahul Sharma',
-        email: email,
-        phone: '+91 98765 43210',
-        createdAt: new Date(),
-      };
-
-      setUser(mockUser);
-      localStorage.setItem('paisaka_user', JSON.stringify(mockUser));
+      const supabase = getBrowserSupabase();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return false;
       return true;
-    } catch (error) {
-      console.error('Login error:', error);
-      return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signup = async (userData: { name: string; email: string; phone: string; password: string }): Promise<boolean> => {
+  const signup = async (userData: { name?: string; email: string; phone?: string; password: string }): Promise<{ ok: boolean; needsVerification?: boolean }> => {
     setIsLoading(true);
     try {
-      // Simulate API call - replace with actual registration
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mock user data - replace with actual API response
-      const newUser: User = {
-        id: Date.now().toString(),
-        name: userData.name,
+      const supabase = getBrowserSupabase();
+      const { data, error } = await supabase.auth.signUp({
         email: userData.email,
-        phone: userData.phone,
-        createdAt: new Date(),
-      };
-
-      setUser(newUser);
-      localStorage.setItem('paisaka_user', JSON.stringify(newUser));
-      return true;
-    } catch (error) {
-      console.error('Signup error:', error);
-      return false;
+        password: userData.password,
+        options: { data: { full_name: userData.name } },
+      });
+      if (error) return { ok: false };
+      // Create profile row (idempotent via RLS/trigger or API)
+      if (data.user) {
+        try {
+          await fetch('/api/user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: data.user.id, full_name: userData.name }),
+          });
+        } catch {}
+      }
+      const hasSession = !!data.session;
+      return hasSession ? { ok: true } : { ok: true, needsVerification: true };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('paisaka_user');
-    localStorage.removeItem('paisaka_expenses');
-    localStorage.removeItem('paisaka_groups');
+  const logout = async () => {
+    const supabase = getBrowserSupabase();
+    await supabase.auth.signOut();
   };
 
-  const updateProfile = async (userData: Partial<User>): Promise<boolean> => {
-    if (!user) return false;
-    
-    setIsLoading(true);
-    try {
-      // Simulate API call - replace with actual update
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      localStorage.setItem('paisaka_user', JSON.stringify(updatedUser));
-      return true;
-    } catch (error) {
-      console.error('Profile update error:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
+  const updateProfile = async (_userData: Partial<User>): Promise<boolean> => {
+    return true;
   };
 
   return (

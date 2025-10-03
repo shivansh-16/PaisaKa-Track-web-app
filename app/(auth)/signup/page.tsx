@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { getBrowserSupabase } from '@/lib/db';
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -51,7 +52,6 @@ export default function Signup() {
         phone: formData.phone,
         password: formData.password
       });
-      
       if (success) {
         router.push('/');
       } else {
@@ -61,6 +61,16 @@ export default function Signup() {
       setError('Signup failed. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    try {
+      const supabase = getBrowserSupabase();
+      const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+      if (error) throw error;
+    } catch (e) {
+      setError('Google sign-in failed');
     }
   };
   return (
@@ -214,7 +224,7 @@ export default function Signup() {
         </div>
 
         {/* Google Signup */}
-        <button className="w-full p-4 rounded-lg border flex items-center justify-center gap-3" style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)' }}>
+        <button onClick={handleGoogleSignup} className="w-full p-4 rounded-lg border flex items-center justify-center gap-3" style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)' }}>
           <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">G</div>
           <span className="font-medium" style={{ color: 'var(--pk-text-primary)' }}>Continue with Google</span>
         </button>

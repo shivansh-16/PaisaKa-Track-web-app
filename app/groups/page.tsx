@@ -1,5 +1,10 @@
+import React from 'react'
+import Image from 'next/image'
+import Protected from '@/components/Protected'
+
 export default function Groups() {
   return (
+    <Protected>
     <div className="min-h-dvh px-4 py-6 sm:px-6 md:px-8" style={{ background: 'var(--pk-bg)' }}>
       {/* Header */}
       <header className="flex items-center justify-between mb-6">
@@ -22,7 +27,7 @@ export default function Groups() {
               <div className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>Members: 12 👥</div>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="text-center">
               <div className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>Total Fund</div>
@@ -65,11 +70,13 @@ export default function Groups() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 mt-4">
-            <a href="/groups/1/expenses/add" className="pk-button-primary">
-              ➕ ADD NEW EXPENSE
+            <a href="/groups/1/expenses/add" className="pk-button-primary flex items-center justify-center gap-3 p-4">
+              <div className="text-2xl"><Image src="/add.svg" width={25} height={25} alt="Add Expense" /></div>
+              <div className="text-[14] font-medium">ADD EXPENSE</div>
             </a>
-            <a href="/groups/split/1" className="pk-button-secondary">
-              💰 SPLIT EXPENSE
+            <a href="/groups/split/1" className="pk-button-secondary flex items-center justify-center gap-3 p-4">
+              <div className="text-2xl"><Image src="/money.svg" width={25} height={25} alt="Add Expense" /></div>
+              <div className="text-[14] font-medium">SPLIT EXPENSE</div>
             </a>
           </div>
         </section>
@@ -83,7 +90,7 @@ export default function Groups() {
               <div className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>Members: 4 👥</div>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="text-center">
               <div className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>Total Fund</div>
@@ -105,5 +112,6 @@ export default function Groups() {
         </section>
       </main>
     </div>
+    </Protected>
   );
 }
