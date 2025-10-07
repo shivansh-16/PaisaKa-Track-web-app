@@ -108,6 +108,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: false, error: json?.error || 'Signup failed', code: json?.code };
       }
 
+      // Set session in browser Supabase client if provided
+      if (json.session) {
+        const supabase = getBrowserSupabase();
+        await supabase.auth.setSession({
+          access_token: json.session.access_token,
+          refresh_token: json.session.refresh_token
+        });
+      }
+
+      // Update user state
+      if (json.user) {
+        setUser({
+          id: json.user.id,
+          email: json.user.email,
+          createdAt: new Date(json.user.created_at)
+        });
+      }
+
       // normalize server response to expected shape
       return { ok: true, needsVerification: !!json.needsVerification };
     } catch (error) {
