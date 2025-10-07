@@ -46,16 +46,23 @@ export default function Signup() {
     }
 
     try {
-      const success = await signup({
+      const result = await signup({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         password: formData.password
       });
-      if (success) {
-        router.push('/');
+      
+      if (result.ok) {
+        // Successful signup - redirect to dashboard
+        router.push('/dashboard');
       } else {
-        setError('Signup failed. Please try again.');
+        // Handle specific error cases
+        if (result.code === 'USER_EXISTS') {
+          setError('This email is already registered. Please login instead.');
+        } else {
+          setError(result.error || 'Signup failed. Please try again.');
+        }
       }
     } catch (err) {
       setError('Signup failed. Please try again.');
