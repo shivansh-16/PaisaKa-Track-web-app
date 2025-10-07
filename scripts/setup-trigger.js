@@ -6,32 +6,7 @@ const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXB
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function setupTrigger() {
-  console.log('Setting up profile creation trigger...');
-  
-  // First create the helper function
-  const helperFunctionSQL = `
-create or replace function public.is_group_member(p_group_id uuid)
-returns boolean
-language sql
-security definer
-stable
-as $$
-  select exists (
-    select 1 
-    from public.group_members 
-    where group_id = p_group_id 
-      and user_id = auth.uid()
-  );
-$$;
-  `;
-
-  const { error: helperError } = await supabase.rpc('exec_sql', { sql: helperFunctionSQL }).catch(() => ({ error: null }));
-  if (helperError) {
-    console.log('Note: Helper function setup via RPC not available (expected in managed Supabase)');
-  }
-
-  // For existing users, manually create profiles
-  console.log('\nCreating profiles for existing users...');
+  console.log('Setting up profiles for existing users...\n');
   
   // Get all users who don't have profiles
   const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
