@@ -21,9 +21,10 @@ export default function Login() {
     try {
       const success = await login(email, password);
       if (success) {
-        router.push('/');
+        // Successful login - redirect to dashboard
+        router.push('/dashboard');
       } else {
-        setError('Invalid email or password');
+        setError('Invalid email or password. Please check your credentials.');
       }
     } catch (err) {
       setError('Login failed. Please try again.');
