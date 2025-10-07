@@ -15,3 +15,19 @@ export async function GET(req: Request) {
 	}
 	return new Response(JSON.stringify({ user, profile: data }), { status: 200 });
 }
+
+export async function POST(req: Request) {
+	const { id, full_name } = await req.json();
+	
+	// Create profile for new user
+	const supabase = getServerSupabase();
+	const { error } = await supabase
+		.from("profiles")
+		.insert({ id, full_name });
+		
+	if (error) {
+		return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+	}
+	
+	return new Response(JSON.stringify({ message: "Profile created successfully" }), { status: 200 });
+}

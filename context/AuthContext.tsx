@@ -30,13 +30,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = getBrowserSupabase();
     supabase.auth.getUser().then(({ data }) => {
       if (data?.user) {
-        setUser({ id: data.user.id, email: data.user.email, createdAt: new Date(data.user.created_at) });
+        setUser({ id: data.user.id, email: data.user.email || null, createdAt: new Date(data.user.created_at) });
       }
       setIsLoading(false);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        setUser({ id: session.user.id, email: session.user.email, createdAt: new Date(session.user.created_at) });
+        setUser({ id: session.user.id, email: session.user.email || null, createdAt: new Date(session.user.created_at) });
       } else {
         setUser(null);
       }
@@ -47,37 +47,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      const supabase = getBrowserSupabase();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return false;
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, type: 'login' }),
+      });
+      const data = await response.json();
+      if (!response.ok || data.error) return false;
       return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signup = async (userData: { name?: string; email: string; phone?: string; password: string }): Promise<{ ok: boolean; needsVerification?: boolean }> => {
+  const signup = async (userData: { 
+    name?: string; 
+    email: string; 
+    phone?: string; 
+    password: string 
+  }): Promise<{ ok: boolean; needsVerification?: boolean; error?: string; code?: string }> => {
     setIsLoading(true);
     try {
-      const supabase = getBrowserSupabase();
-      const { data, error } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-        options: { data: { full_name: userData.name } },
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...userData, type: 'signup' }),
       });
-      if (error) return { ok: false };
-      // Create profile row (idempotent via RLS/trigger or API)
-      if (data.user) {
-        try {
-          await fetch('/api/user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: data.user.id, full_name: userData.name }),
-          });
-        } catch {}
+
+      const json = await response.json();
+      if (!response.ok) {
+        // return structured failure so UI can show friendly messages without try/catch
+        return { ok: false, error: json?.error || 'Signup failed', code: json?.code };
       }
-      const hasSession = !!data.session;
-      return hasSession ? { ok: true } : { ok: true, needsVerification: true };
+
+      // normalize server response to expected shape
+      return { ok: true, needsVerification: !!json.needsVerification };
+    } catch (error) {
+      console.error('Signup error:', error);
+      return { ok: false, error: (error as any)?.message || 'Signup failed' };
     } finally {
       setIsLoading(false);
     }

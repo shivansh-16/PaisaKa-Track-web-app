@@ -124,3 +124,20 @@ alter table public.transactions enable row level security;
 alter table public.groups enable row level security;
 alter table public.group_members enable row level security;
 alter table public.group_expenses enable row level security;
+
+-- Function and trigger to automatically create a profile when a user signs up
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+as $$
+begin
+  insert into public.profiles (id, full_name, created_at, updated_at)
+  values (new.id, new.raw_user_meta_data->>'full_name', new.created_at, new.created_at);
+  return new;
+end;
+$$;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
