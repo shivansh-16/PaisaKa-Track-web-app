@@ -6,6 +6,7 @@ import { getBrowserSupabase } from '@/lib/db';
 interface User {
   id: string;
   email: string | null;
+  name?: string;
   phone?: string;
   avatar?: string;
   createdAt: Date;
@@ -15,7 +16,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (userData: { name?: string; email: string; phone?: string; password: string }) => Promise<{ ok: boolean; needsVerification?: boolean }>;
+  signup: (userData: { name?: string; email: string; phone?: string; password: string }) => Promise<{ ok: boolean; needsVerification?: boolean; error?: string; code?: string }>;
   logout: () => Promise<void>;
   updateProfile: (userData: Partial<User>) => Promise<boolean>;
 }
@@ -30,13 +31,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = getBrowserSupabase();
     supabase.auth.getUser().then(({ data }) => {
       if (data?.user) {
-        setUser({ id: data.user.id, email: data.user.email || null, createdAt: new Date(data.user.created_at) });
+        const u = data.user;
+        setUser({
+          id: u.id,
+          email: u.email || null,
+          name: (u.user_metadata as any)?.name || undefined,
+          phone: (u as any)?.phone || undefined,
+          avatar: (u.user_metadata as any)?.avatar || undefined,
+          createdAt: new Date(u.created_at),
+        });
       }
       setIsLoading(false);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        setUser({ id: session.user.id, email: session.user.email || null, createdAt: new Date(session.user.created_at) });
+        const u = session.user;
+        setUser({
+          id: u.id,
+          email: u.email || null,
+          name: (u.user_metadata as any)?.name || undefined,
+          phone: (u as any)?.phone || undefined,
+          avatar: (u.user_metadata as any)?.avatar || undefined,
+          createdAt: new Date(u.created_at),
+        });
       } else {
         setUser(null);
       }
@@ -70,10 +87,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Update user state
       if (data.user) {
+        const u = data.user;
         setUser({
-          id: data.user.id,
-          email: data.user.email,
-          createdAt: new Date(data.user.created_at)
+          id: u.id,
+          email: u.email,
+          name: (u.user_metadata as any)?.name || undefined,
+          phone: (u as any)?.phone || undefined,
+          avatar: (u.user_metadata as any)?.avatar || undefined,
+          createdAt: new Date(u.created_at),
         });
       }
 
@@ -119,10 +140,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Update user state
       if (json.user) {
+        const u = json.user;
         setUser({
-          id: json.user.id,
-          email: json.user.email,
-          createdAt: new Date(json.user.created_at)
+          id: u.id,
+          email: u.email,
+          name: (u.user_metadata as any)?.name || undefined,
+          phone: (u as any)?.phone || undefined,
+          avatar: (u.user_metadata as any)?.avatar || undefined,
+          createdAt: new Date(u.created_at),
         });
       }
 
@@ -141,8 +166,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
-  const updateProfile = async (_userData: Partial<User>): Promise<boolean> => {
-    return true;
+  const updateProfile = async (userData: Partial<User>): Promise<boolean> => {
+    const supabase = getBrowserSupabase();
+    try {
+      // currently we only support updating the name in auth.user_metadata
+      const name = userData.name;
+      if (typeof name !== 'string') return false;
+
+      const { data, error } = await supabase.auth.updateUser({ data: { user_metadata: { name } } });
+      if (error) {
+        console.error('[AuthContext] updateProfile error:', error);
+        return false;
+      }
+
+      // update local user state from returned user
+      const u = (data as any)?.user;
+      if (u) {
+        setUser((prev) => ({
+          id: u.id,
+          email: u.email || null,
+          name: (u.user_metadata as any)?.name || undefined,
+          phone: (u as any)?.phone || undefined,
+          avatar: (u.user_metadata as any)?.avatar || undefined,
+          createdAt: new Date(u.created_at),
+        }));
+      }
+
+      return true;
+    } catch (err) {
+      console.error('[AuthContext] updateProfile unexpected error:', err);
+      return false;
+    }
   };
 
   return (
