@@ -137,6 +137,22 @@ const translations: Record<Lang, Record<string, string>> = {
                 'nav.analytics': 'Analytics',
                 'nav.groups': 'Groups',
                 'nav.profile': 'Profile',
+                // Analytics
+                'analytics.title': 'Analytics',
+                'analytics.trends': 'Trends',
+                'analytics.period': 'Period',
+                'analytics.totalSpent': 'Total Spent',
+                'analytics.totalIncome': 'Total Income',
+                'analytics.savingsRate': 'Savings Rate',
+                'analytics.categoryBreakdown': 'Category Breakdown',
+                'analytics.topSpends': 'Top Spends',
+                'analytics.groupPlaceholder': 'Group stats will appear here if you are part of any groups',
+                'analytics.noData': 'No data',
+                'analytics.download': 'Download',
+                // Settings
+                'settings.title': 'Settings',
+                'settings.language': 'Language',
+                'settings.changeLanguage': 'Change app language',
                 
                 // Common
                 'common.loading': 'Loading...',
@@ -287,6 +303,22 @@ const translations: Record<Lang, Record<string, string>> = {
                 'nav.analytics': 'एनालिटिक्स',
                 'nav.groups': 'ग्रुप',
                 'nav.profile': 'प्रोफाइल',
+                // Analytics
+                'analytics.title': 'एनालिटिक्स',
+                'analytics.trends': 'ट्रेंड्स',
+                'analytics.period': 'अवधि',
+                'analytics.totalSpent': 'कुल खर्च',
+                'analytics.totalIncome': 'कुल आय',
+                'analytics.savingsRate': 'बचत दर',
+                'analytics.categoryBreakdown': 'श्रेणी अनुसार खर्च',
+                'analytics.topSpends': 'ऊपर खर्च',
+                'analytics.groupPlaceholder': 'यदि आप किसी समूह के सदस्य हैं तो समूह आँकड़े यहाँ दिखेंगे',
+                'analytics.noData': 'डेटा नहीं है',
+                'analytics.download': 'डाउनलोड',
+                // Settings
+                'settings.title': 'सेटिंग्स',
+                'settings.language': 'भाषा',
+                'settings.changeLanguage': 'ऐप भाषा बदलें',
                 
                 // Common
                 'common.loading': 'लोड हो रहा है...',
@@ -316,19 +348,31 @@ const translations: Record<Lang, Record<string, string>> = {
 const LanguageContext = createContext<LangContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-        const [lang, setLangState] = useState<Lang>('en');
-        
-        useEffect(() => {
-                const saved = localStorage.getItem('paisaka_lang') as Lang | null;
-                if (saved === 'en' || saved === 'hi') {
-                        setLangState(saved);
+        // initialize from localStorage synchronously so UI doesn't flash
+        const [lang, setLangState] = useState<Lang>(() => {
+                try {
+                        const saved = (typeof window !== 'undefined' && localStorage.getItem('paisaka_lang')) as Lang | null;
+                        if (saved === 'en' || saved === 'hi') return saved;
+                } catch (e) {
+                        // ignore
                 }
-        }, []);
-        
+                return 'en';
+        });
+
+        // keep document <html lang=...> in sync for accessibility and SEO-ish clients
+        // runs on client whenever language changes
+        useEffect(() => {
+                try {
+                        document.documentElement.lang = lang === 'hi' ? 'hi' : 'en';
+                } catch (e) {
+                        // ignore (e.g., during SSR)
+                }
+        }, [lang]);
+
         const setLang = (l: Lang) => {
                 setLangState(l);
-                localStorage.setItem('paisaka_lang', l);
-                
+                try { localStorage.setItem('paisaka_lang', l); } catch (e) { /* ignore */ }
+
                 // TODO: Update user profile in Supabase with language preference
                 // This will be implemented when user profile update is ready
         };

@@ -114,7 +114,13 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     try {
       if (!user) return;
       setIsLoading(true);
-      const res = await fetch('/api/expenses', { cache: 'no-store' });
+      // include access token from browser supabase client
+      const { getBrowserSupabase } = await import('@/lib/db');
+      const supabase = getBrowserSupabase();
+      const session = await supabase.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch('/api/expenses', { cache: 'no-store', headers });
       if (!res.ok) throw new Error('Failed to fetch expenses');
       const data = await res.json();
       const items = (data.items || []).map((t: any) => ({
@@ -140,7 +146,12 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   async function fetchGroupsFromApi() {
     try {
       if (!user) return;
-      const res = await fetch('/api/groups', { cache: 'no-store' });
+      const { getBrowserSupabase } = await import('@/lib/db');
+      const supabase = getBrowserSupabase();
+      const session = await supabase.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch('/api/groups', { cache: 'no-store', headers });
       if (!res.ok) throw new Error('Failed to fetch groups');
       const data = await res.json();
       const list = (data.items || []).map((g: any) => ({

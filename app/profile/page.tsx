@@ -131,6 +131,19 @@ export default function Profile() {
           <section className="pk-card">
             <h2 className="pk-section-title mb-4">Settings</h2>
             <div className="space-y-3">
+              <div className="w-full p-4 rounded-lg border flex items-center justify-between" style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)' }}>
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">🌐</span>
+                  <div>
+                    <div style={{ color: 'var(--pk-text-primary)' }}>{T('settings.language')}</div>
+                    <div className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>{T('settings.changeLanguage')}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setLang('en')} className={`p-2 rounded border ${lang==='en' ? 'font-bold' : ''}`} style={{ borderColor: 'var(--pk-border)' }}>EN</button>
+                  <button onClick={() => setLang('hi')} className={`p-2 rounded border ${lang==='hi' ? 'font-bold' : ''}`} style={{ borderColor: 'var(--pk-border)' }}>हिं</button>
+                </div>
+              </div>
               <button className="w-full p-4 rounded-lg border flex items-center justify-between" style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)' }}>
                 <div className="flex items-center gap-3">
                   <span className="text-lg">🔒</span>

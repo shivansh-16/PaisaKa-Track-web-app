@@ -12,7 +12,7 @@ export default function AddExpense() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const { user } = useAuth();
   const router = useRouter();
 
@@ -50,9 +50,15 @@ export default function AddExpense() {
         note: formData.description || null,
         occurred_at: new Date().toISOString(),
       };
+      const { getBrowserSupabase } = await import('@/lib/db');
+      const supabase = getBrowserSupabase();
+      const session = await supabase.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
       const res = await fetch('/api/expenses', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error('Failed to save');
@@ -85,17 +91,20 @@ export default function AddExpense() {
           {/* Amount Input */}
           <section className="pk-card text-center">
             <div className="text-sm mb-2" style={{ color: 'var(--pk-text-secondary)' }}>Amount (रुपये)</div>
-            <div className="text-4xl font-bold pk-rupee">₹</div>
-            <input 
-              type="number" 
-              name="amount"
-              placeholder="100" 
-              className="text-4xl font-bold text-center border-none outline-none w-full"
-              style={{ background: 'transparent', color: 'var(--pk-text-primary)' }}
-              value={formData.amount}
-              onChange={handleChange}
-              required
-            />
+            <div className="text-4xl font-bold pk-rupee flex justify-center items-center ">
+              <span>₹</span>
+              <input
+                type="number"
+                name="amount"
+                placeholder="100"
+                className="text-4xl font-bold text-center border-none outline-none w-1/2 px-2 p-1"
+                style={{ background: 'transparent', color: 'var(--pk-text-primary)' }}
+                value={formData.amount}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
           </section>
 
           {/* Category Selection */}
@@ -117,12 +126,11 @@ export default function AddExpense() {
                   key={category.name}
                   type="button"
                   onClick={() => handleCategorySelect(category.name)}
-                  className={`p-4 rounded-lg border text-center ${
-                    formData.category === category.name 
-                      ? 'border-orange-500 bg-orange-50' 
-                      : 'border-gray-200 bg-white'
-                  }`}
-                  style={{ 
+                  className={`p-4 rounded-lg border text-center ${formData.category === category.name
+                    ? 'border-orange-500 bg-orange-50'
+                    : 'border-gray-200 bg-white'
+                    }`}
+                  style={{
                     borderColor: formData.category === category.name ? 'var(--pk-orange)' : 'var(--pk-border)',
                     background: formData.category === category.name ? 'var(--pk-bg)' : 'var(--pk-card)'
                   }}
@@ -140,10 +148,10 @@ export default function AddExpense() {
           <section className="pk-card">
             <h2 className="pk-section-title mb-4">📝 बोलिये या लिखिये</h2>
             <div className="relative">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 name="description"
-                placeholder="Add description (optional)..." 
+                placeholder="Add description (optional)..."
                 className="w-full p-4 pr-12 rounded-lg border"
                 style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)', color: 'var(--pk-text-primary)' }}
                 value={formData.description}
@@ -163,8 +171,8 @@ export default function AddExpense() {
 
           {/* Save Button */}
           <section className="pb-6">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="pk-button-primary w-full text-lg"
               disabled={isLoading}
             >
