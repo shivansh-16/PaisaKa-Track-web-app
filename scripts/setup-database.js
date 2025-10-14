@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://jtntqpeibauiqelkpzog.supabase.co';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0bnRxcGVpYmF1aXFlbGtwem9nIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTQ3Mzk2NiwiZXhwIjoyMDc1MDQ5OTY2fQ.AIkvy2F0j2sxlQ768OXBB1xcsDxds0i8tRH0RzkCVw4';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
