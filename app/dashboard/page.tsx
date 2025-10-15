@@ -2,25 +2,12 @@
 
     import Image from 'next/image';
     import { useAuth } from '@/context/AuthContext';
-    import { useExpenses, Expense } from '@/context/ExpenseContext';
+    import { useExpenses, Expense } from '@/context/ExpenseContext'; // Import Expense type
     import { useEffect } from 'react';
     import { useRouter } from 'next/navigation';
     import { User } from 'lucide-react';
     import RealtimeSubscriber from '@/components/RealtimeSubscriber';
     import Protected from '@/components/Protected';
-
-    const categoryEmojis: { [key: string]: string } = {
-      'Food': '🍕',
-      'Transport': '🚗',
-      'Tea': '☕',
-      'Movies': '🎬',
-      'Medical': '🏥',
-      'Shopping': '🛒',
-      'Clothes': '👕',
-      'Bills': '💡',
-      'Education': '🎓',
-      'Misc': '💰',
-    };
 
     export default function Dashboard() {
       const { user, isLoading: authLoading } = useAuth();
@@ -42,7 +29,7 @@
       const monthlySpending = getMonthlySpending(currentMonth, currentYear);
       const recentExpenses = expenses
         .filter(expense => expense.amount < 0)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime())
         .slice(0, 4);
 
       return (
@@ -108,16 +95,30 @@
                 <h2 className="pk-section-title mb-4">Recent Expenses</h2>
                 <div className="space-y-4">
                   {recentExpenses.length > 0 ? (
-                    recentExpenses.map((expense: Expense) => {
-                      const emoji = categoryEmojis[expense.category || 'Misc'];
-                      const time = new Date(expense.date).toLocaleTimeString('en-US', {
+                    recentExpenses.map((expense) => {
+                      const categoryEmojis: { [key: string]: string } = {
+                        'Food': '🍕',
+                        'Transport': '🚗',
+                        'Tea': '☕',
+                        'Movies': '🎬',
+                        'Medical': '🏥',
+                        'Shopping': '🛒',
+                        'Clothes': '👕',
+                        'Bills': '💡',
+                        'Education': '🎓',
+                      };
+
+                      const emoji = categoryEmojis[expense.category || 'Misc'] || '💰';
+                      const time = new Date(expense.occurred_at).toLocaleTimeString('en-US', {
                         hour: 'numeric',
                         minute: '2-digit',
                         hour12: true
                       });
 
                       let displayText;
-                      if (expense.description) {
+                      if (expense.title) {
+                        displayText = expense.title;
+                      } else if (expense.description) {
                         displayText = expense.description;
                       } else if (expense.category) {
                         displayText = expense.category;

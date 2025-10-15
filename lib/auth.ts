@@ -16,4 +16,3 @@ export async function requireUser(req: Request) {
 	}
 	return { user, response: null as Response | null } as const;
 }
-

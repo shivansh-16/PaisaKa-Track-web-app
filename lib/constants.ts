@@ -27,4 +27,3 @@ export const IMAGE_COMPRESSION_QUALITY = parseNumber(process.env.IMAGE_COMPRESSI
 export const ALLOWED_FILE_TYPES = (process.env.ALLOWED_FILE_TYPES || "image/jpeg,image/png,image/webp,application/pdf")
 	.split(",")
 	.map((t) => t.trim());
-
