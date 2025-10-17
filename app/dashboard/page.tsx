@@ -8,10 +8,12 @@
     import { User } from 'lucide-react';
     import RealtimeSubscriber from '@/components/RealtimeSubscriber';
     import Protected from '@/components/Protected';
+    import { useLanguage } from '@/context/LanguageContext';
 
     export default function Dashboard() {
       const { user, isLoading: authLoading } = useAuth();
       const { expenses, groups, getTotalBalance, getMonthlySpending, isLoading: expenseLoading } = useExpenses();
+      const { lang } = useLanguage();
       const router = useRouter();
 
       useEffect(() => {
@@ -98,14 +100,23 @@
                     recentExpenses.map((expense) => {
                       const categoryEmojis: { [key: string]: string } = {
                         'Food': '🍕',
+                        'भोजन': '🍕',
                         'Transport': '🚗',
+                        'यातायात': '🚗',
                         'Tea': '☕',
+                        'चाय': '☕',
                         'Movies': '🎬',
+                        'मनोरंजन': '🎬',
                         'Medical': '🏥',
+                        'चिकित्सा': '🏥',
                         'Shopping': '🛒',
+                        'खरीदारी': '🛒',
                         'Clothes': '👕',
+                        'कपड़े': '👕',
                         'Bills': '💡',
+                        'बिल': '💡',
                         'Education': '🎓',
+                        'शिक्षा': '🎓',
                       };
 
                       const emoji = categoryEmojis[expense.category || 'Misc'] || '💰';

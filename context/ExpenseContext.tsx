@@ -2,6 +2,7 @@
 
     import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
     import { useAuth } from './AuthContext';
+    import { useLanguage } from './LanguageContext';
 
     export interface Expense {
       id: string;
@@ -90,6 +91,7 @@
 
     export function ExpenseProvider({ children }: { children: ReactNode }) {
       const { user } = useAuth();
+      const { lang } = useLanguage();
       const [expenses, setExpenses] = useState<Expense[]>([]);
       const [groups, setGroups] = useState<Group[]>([]);
       const [splits, setSplits] = useState<Split[]>([]);
@@ -129,7 +131,9 @@
             id: String(t.id),
             userId: user.id,
             amount: t.type === 'expense' ? -Number(t.amount) : Number(t.amount),
-            category: String(t.category_id ?? 'Misc'),
+            category: lang === 'hi' && t.categories?.name_hi ?
+              t.categories.name_hi :
+              (t.categories?.name_en || String(t.category_id ?? 'Misc')),
             description: t.note ?? undefined,
             date: new Date(t.occurred_at),
             isGroupExpense: false,

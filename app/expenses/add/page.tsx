@@ -3,6 +3,7 @@
     import { useState } from 'react';
     import { useRouter } from 'next/navigation';
     import { useAuth } from '@/context/AuthContext';
+    import { useLanguage } from '@/context/LanguageContext';
 
     export default function AddExpense() {
       const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@
       const [error, setError] = useState('');
 
       const { user } = useAuth();
+      const { lang } = useLanguage();
       const router = useRouter();
 
       const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,17 +39,40 @@
         setIsLoading(true);
         setError('');
 
-        if (!formData.amount || !formData.category) {
-          setError('Please fill in all required fields');
+        // Check if amount is provided and is a valid number
+        if (!formData.amount) {
+          setError('Please enter an amount');
+          setIsLoading(false);
+          return;
+        }
+        
+        const amountValue = parseFloat(formData.amount);
+        if (isNaN(amountValue) || amountValue <= 0) {
+          setError('Please enter a valid amount greater than zero');
+          setIsLoading(false);
+          return;
+        }
+        
+        if (!formData.category) {
+          setError('Please select a category');
           setIsLoading(false);
           return;
         }
 
         try {
+          // Validate amount is a proper number
+          const amountValue = parseFloat(formData.amount);
+          if (isNaN(amountValue) || amountValue <= 0) {
+            setError('Please enter a valid amount greater than zero');
+            setIsLoading(false);
+            return;
+          }
+          
           const payload = {
             type: 'expense',
-            amount: Math.abs(parseFloat(formData.amount)),
+            amount: Math.abs(amountValue),
             category: formData.category,
+            language: lang,
             title: formData.title || null,
             note: formData.description || null,
             occurred_at: new Date().toISOString(),
@@ -111,18 +136,20 @@
 
               {/* Category Selection */}
               <section className="pk-card">
-                <h2 className="pk-section-title mb-4">Select Category</h2>
+                <h2 className="pk-section-title mb-4">
+                  {lang === 'hi' ? 'श्रेणी चुनें' : 'Select Category'}
+                </h2>
                 <div className="grid grid-cols-3 gap-4">
                   {[
-                    { emoji: '🍕', name: 'Food' },
-                    { emoji: '🚗', name: 'Transport' },
-                    { emoji: '☕', name: 'Tea' },
-                    { emoji: '🎬', name: 'Movies' },
-                    { emoji: '🏥', name: 'Medical' },
-                    { emoji: '🛒', name: 'Shopping' },
-                    { emoji: '👕', name: 'Clothes' },
-                    { emoji: '💡', name: 'Bills' },
-                    { emoji: '🎓', name: 'Education' },
+                    { emoji: '🍕', name: lang === 'hi' ? 'भोजन' : 'Food' },
+                    { emoji: '🚗', name: lang === 'hi' ? 'यातायात' : 'Transport' },
+                    { emoji: '☕', name: lang === 'hi' ? 'चाय' : 'Tea' },
+                    { emoji: '🎬', name: lang === 'hi' ? 'मनोरंजन' : 'Movies' },
+                    { emoji: '🏥', name: lang === 'hi' ? 'चिकित्सा' : 'Medical' },
+                    { emoji: '🛒', name: lang === 'hi' ? 'खरीदारी' : 'Shopping' },
+                    { emoji: '👕', name: lang === 'hi' ? 'कपड़े' : 'Clothes' },
+                    { emoji: '💡', name: lang === 'hi' ? 'बिल' : 'Bills' },
+                    { emoji: '🎓', name: lang === 'hi' ? 'शिक्षा' : 'Education' },
                   ].map((category) => (
                     <button
                       key={category.name}
