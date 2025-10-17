@@ -6,6 +6,13 @@ import { useAuth } from "@/context/AuthContext";
 export default function ClientBottomNavWrapper() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const shouldShowBottomNav = !!user && !pathname.startsWith('/login') && !pathname.startsWith('/signup') && !pathname.startsWith('/welcome');
+  
+  // Improved logic to hide bottom nav on auth routes
+  const shouldShowBottomNav = !!user &&
+    !pathname.startsWith('/login') &&
+    !pathname.startsWith('/signup') &&
+    !pathname.startsWith('/welcome') &&
+    !pathname.startsWith('/(auth)');
+  
   return shouldShowBottomNav ? <BottomNavigation /> : null;
 }

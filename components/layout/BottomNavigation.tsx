@@ -71,6 +71,31 @@ const BottomNavigation = () => {
             </Link>
           );
         })}
+        {/* Add Expense Button */}
+        <Link
+          href="/expenses/add"
+          className="flex flex-col items-center justify-center min-w-[60px] relative"
+        >
+          <span
+            className={`
+              flex flex-col items-center justify-center w-full px-3 py-1 rounded-lg transition
+              ${pathname === '/expenses/add' ? 'bg-[#FF9933]' : ''}`} style={{ minWidth: 48 }}>
+            <PlusCircle
+              size={24}
+              className={`transition ${pathname === '/expenses/add' ? 'text-black' : 'text-gray-500'}`}
+              style={{ zIndex: 10 }}
+            />
+            <span
+              className={`
+                text-xs mt-1 font-medium transition
+                ${pathname === '/expenses/add' ? 'text-black' : 'text-gray-500'}
+              `}
+              style={{ zIndex: 10 }}
+            >
+              Add
+            </span>
+          </span>
+        </Link>
       </div>
     </div>
   );

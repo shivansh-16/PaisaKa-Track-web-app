@@ -74,18 +74,29 @@ export async function POST(req: Request) {
       const { data: categoryData, error: categoryError } = await supabase
         .from('categories')
         .select('id')
-        .eq(columnName, body.category)
-        .single();
+        .eq(columnName, body.category);
 
       if (categoryError) {
         console.error("Error fetching category ID:", categoryError);
         return new Response(JSON.stringify({ error: "Invalid category" }), { status: 400 });
       }
 
-      if (categoryData) {
-        categoryId = categoryData.id;
+      // Check if we found any matching categories
+      if (categoryData && categoryData.length > 0) {
+        categoryId = categoryData[0].id;
       } else {
-        return new Response(JSON.stringify({ error: "Category not found" }), { status: 400 });
+        // If no exact match found, try to find by English name as fallback
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('categories')
+          .select('id')
+          .eq('name_en', body.category);
+        
+        if (!fallbackError && fallbackData && fallbackData.length > 0) {
+          categoryId = fallbackData[0].id;
+        } else {
+          // If still not found, create a new category or return error
+          return new Response(JSON.stringify({ error: "Category not found" }), { status: 400 });
+        }
       }
     }
 
