@@ -2,7 +2,8 @@
 
     import Image from 'next/image';
     import { useAuth } from '@/context/AuthContext';
-    import { useExpenses, Expense } from '@/context/ExpenseContext'; // Import Expense type
+    import { useExpenses } from '@/context/ExpenseContext';
+    import { useIncomes } from '@/context/IncomeContext';
     import { useEffect } from 'react';
     import { useRouter } from 'next/navigation';
     import { User } from 'lucide-react';
@@ -13,6 +14,7 @@
     export default function Dashboard() {
       const { user, isLoading: authLoading } = useAuth();
       const { expenses, groups, getTotalBalance, getMonthlySpending, isLoading: expenseLoading } = useExpenses();
+      const { incomes, isLoading: incomeLoading } = useIncomes();
       const { lang } = useLanguage();
       const router = useRouter();
 
@@ -25,13 +27,19 @@
       if (!user) {
         return null;
       }
+
       const totalBalance = getTotalBalance();
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
       const monthlySpending = getMonthlySpending(currentMonth, currentYear);
+
       const recentExpenses = expenses
-        .filter(expense => expense.amount < 0)
+        .filter(expense => expense.type === 'expense')
         .sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime())
+        .slice(0, 4);
+
+      const recentIncomes = incomes
+        .sort((a, b) => new Date(b.occurred_at).getTime() - Date(a.occurred_at).getTime())
         .slice(0, 4);
 
       return (
@@ -86,10 +94,10 @@
                   <div className="text-2xl"><Image src="/add.svg" width={20} height={20} alt="Add Expense" /></div>
                   <div className="text-sm font-medium">Add Expense</div>
                 </a>
-                <button className="h-20 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2" style={{ borderColor: 'var(--pk-orange)', background: 'white' }}>
-                  <div className="text-2xl"><Image src="/mic.svg" width={20} height={20} alt="Voice Add" /></div>
-                  <div className="text-sm font-medium" style={{ color: 'var(--pk-orange)' }}>Voice Add</div>
-                </button>
+                <a href="/incomes/add" className="pk-button-primary h-20 flex flex-col items-center justify-center gap-2">
+                  <div className="text-2xl"><Image src="/add.svg" width={20} height={20} alt="Add Income" /></div>
+                  <div className="text-sm font-medium">Add Income</div>
+                </a>
               </section>
 
               {/* Recent Expenses */}
@@ -161,6 +169,72 @@
                       <div className="text-4xl mb-2">📝</div>
                       <p>No expenses yet</p>
                       <p className="text-sm">Add your first expense to get started!</p>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* Recent Incomes */}
+              <section className="pk-card">
+                <h2 className="pk-section-title mb-4">Recent Incomes</h2>
+                <div className="space-y-4">
+                  {recentIncomes.length > 0 ? (
+                    recentIncomes.map((income) => {
+                      const categoryEmojis: { [key: string]: string } = {
+                        'Salary': '💰',
+                        'वेतन': '💰',
+                        'Gift': '🎁',
+                        'उपहार': '🎁',
+                        'Business': '💼',
+                        'व्यवसाय': '💼',
+                        'Investment': '🏦',
+                        'निवेश': '🏦',
+                        'Other': '🍀',
+                        'अन्य': '🍀',
+                      };
+
+                      const emoji = categoryEmojis[income.category || 'Misc'] || '💰';
+                      const time = new Date(income.occurred_at).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                      });
+
+                      let displayText;
+                      if (income.title) {
+                        displayText = income.title;
+                      } else if (income.description) {
+                        displayText = income.description;
+                      } else if (income.category) {
+                        displayText = income.category;
+                      } else {
+                        displayText = 'Misc';
+                      }
+
+                      return (
+                        <div key={income.id} className="flex items-center justify-between py-3">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--pk-bg)' }}>
+                              {emoji}
+                            </div>
+                            <div>
+                              <div className="font-medium" style={{ color: 'var(--pk-text-primary)' }}>
+                                {displayText}
+                              </div>
+                              <div className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>{time}</div>
+                            </div>
+                          </div>
+                          <div className="pk-amount" style={{ color: 'var(--pk-green)' }}>
+                            +₹{Math.abs(income.amount).toLocaleString()}
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-8" style={{ color: 'var(--pk-text-secondary)' }}>
+                      <div className="text-4xl mb-2">💰</div>
+                      <p>No incomes yet</p>
+                      <p className="text-sm">Add your first income to get started!</p>
                     </div>
                   )}
                 </div>
