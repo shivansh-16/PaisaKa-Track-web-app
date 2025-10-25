@@ -4,6 +4,7 @@ drop function if exists public.check_budget_alert_for_transaction();
 create or replace function public.check_budget_alert_for_transaction()
 returns trigger
 language plpgsql
+set search_path = public, pg_temp
 as $$
 declare
   month_start timestamptz := date_trunc('month', new.occurred_at);
