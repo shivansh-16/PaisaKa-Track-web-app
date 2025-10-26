@@ -1,6 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { getBrowserSupabase } from '@/lib/db';
 
 type Lang = 'en' | 'hi';
 
@@ -348,11 +350,23 @@ const translations: Record<Lang, Record<string, string>> = {
 const LanguageContext = createContext<LangContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-        // initialize from localStorage synchronously so UI doesn't flash
+        // initialize from cookie -> localStorage -> browser -> default synchronously so UI doesn't flash
         const [lang, setLangState] = useState<Lang>(() => {
                 try {
-                        const saved = (typeof window !== 'undefined' && localStorage.getItem('paisaka_lang')) as Lang | null;
-                        if (saved === 'en' || saved === 'hi') return saved;
+                        if (typeof window !== 'undefined') {
+                                // read cookie first
+                                const match = document.cookie.match(/(?:^|; )paisaka_lang=([^;]+)/);
+                                const cookie = match ? decodeURIComponent(match[1]) : null;
+                                if (cookie === 'en' || cookie === 'hi') return cookie as Lang;
+
+                                // fallback to localStorage
+                                const saved = localStorage.getItem('paisaka_lang') as Lang | null;
+                                if (saved === 'en' || saved === 'hi') return saved;
+
+                                // fallback to browser language
+                                const nav = navigator?.language || (navigator as any)?.userLanguage || '';
+                                if (nav && nav.startsWith('hi')) return 'hi';
+                        }
                 } catch (e) {
                         // ignore
                 }
@@ -369,16 +383,76 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
                 }
         }, [lang]);
 
-        const setLang = (l: Lang) => {
+        const { user } = useAuth();
+
+        const writeCookie = (l: Lang) => {
+                try {
+                        const d = new Date();
+                        d.setFullYear(d.getFullYear() + 1);
+                        const cookie = `paisaka_lang=${encodeURIComponent(l)}; expires=${d.toUTCString()}; path=/; SameSite=Lax`;
+                        document.cookie = cookie;
+                } catch (e) {
+                        // ignore
+                }
+        };
+
+        // internal local setter that updates cookie/localStorage/doc lang but does not write to Supabase
+        const setLangLocal = (l: Lang) => {
                 setLangState(l);
                 try { localStorage.setItem('paisaka_lang', l); } catch (e) { /* ignore */ }
+                writeCookie(l);
+        };
 
-                // TODO: Update user profile in Supabase with language preference
-                // This will be implemented when user profile update is ready
+        const setLang = async (l: Lang) => {
+                setLangLocal(l);
+
+                // if user is logged in, persist preference to Supabase user_metadata
+                try {
+                        if (user) {
+                                const supabase = getBrowserSupabase();
+                                const { data: getUserData, error: getUserErr } = await supabase.auth.getUser();
+                                const currentMeta = (getUserData?.user as any)?.user_metadata || {};
+                                const newMeta = { ...currentMeta, language: l };
+                                const { data, error } = await supabase.auth.updateUser({ data: { user_metadata: newMeta } });
+                                if (error) {
+                                        console.error('[LanguageContext] failed to persist language to Supabase:', error);
+                                } else {
+                                        // optionally, you could update AuthContext user state here if you expose an updater
+                                }
+                        }
+                } catch (err) {
+                        console.error('[LanguageContext] unexpected error while persisting language:', err);
+                }
         };
         
         const T = (key: string) => translations[lang][key] ?? key;
-        
+
+        // On mount / when user logs in, prefer Supabase stored language over cookie/local
+        useEffect(() => {
+                let cancelled = false;
+                const syncFromSupabase = async () => {
+                        try {
+                                if (user) {
+                                        const supabase = getBrowserSupabase();
+                                        const { data, error } = await supabase.auth.getUser();
+                                        if (!error && data?.user) {
+                                                const meta = (data.user as any)?.user_metadata || {};
+                                                const userLang = meta?.language;
+                                                if (!cancelled && (userLang === 'en' || userLang === 'hi') && userLang !== lang) {
+                                                        // Update local state and cookie to match the user's preference
+                                                        setLangLocal(userLang);
+                                                }
+                                        }
+                                }
+                        } catch (err) {
+                                // ignore
+                        }
+                };
+                syncFromSupabase();
+                return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [user]);
+
         return (
                 <LanguageContext.Provider value={{ lang, setLang, T }}>
                         {children}

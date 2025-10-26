@@ -1,11 +1,11 @@
 import { requireUser } from "@/lib/auth";
-import { getServerSupabase } from "@/lib/db";
+import { getServerSupabaseFromRequest } from "@/lib/db";
 
 export async function GET(req: Request, { params }: { params: { groupId: string } }) {
 	const { user, response } = await requireUser(req);
 	if (!user) return response as Response;
 	const groupId = params.groupId;
-	const supabase = getServerSupabase();
+	const supabase = getServerSupabaseFromRequest(req);
 	const { data, error } = await supabase
 		.from("group_expenses")
 		.select("id, group_id, payer_id, description, amount, currency, occurred_at, created_at")

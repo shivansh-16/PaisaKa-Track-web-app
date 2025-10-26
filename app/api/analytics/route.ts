@@ -1,10 +1,10 @@
 import { requireUser } from "@/lib/auth";
-import { getServerSupabase } from "@/lib/db";
+import { getServerSupabaseFromRequest } from "@/lib/db";
 
 export async function GET(req: Request) {
 	const { user, response } = await requireUser(req);
 	if (!user) return response as Response;
-	const supabase = getServerSupabase();
+	const supabase = getServerSupabaseFromRequest(req);
 	const totals = await supabase.rpc("sql", { sql: `
 		select type, sum(amount)::numeric as total
 		from public.transactions where user_id = '${user.id}' group by type

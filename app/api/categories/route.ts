@@ -1,10 +1,10 @@
 import { requireUser } from "@/lib/auth";
-import { getServerSupabase } from "@/lib/db";
+import { getServerSupabaseFromRequest } from "@/lib/db";
 
 export async function GET(req: Request) {
 	const { user, response } = await requireUser(req);
 	if (!user) return response as Response;
-	const supabase = getServerSupabase();
+	const supabase = getServerSupabaseFromRequest(req);
 	const { data, error } = await supabase
 		.from("categories")
 		.select("id, name_en, name_hi, icon, is_system")
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 	if (!body || typeof body.name_en !== "string" || !body.name_en?.trim()) {
 		return new Response(JSON.stringify({ error: "name_en required" }), { status: 400 });
 	}
-	const supabase = getServerSupabase();
+	const supabase = getServerSupabaseFromRequest(req);
 	const payload = {
 		owner_id: user.id,
 		name_en: body.name_en.trim(),

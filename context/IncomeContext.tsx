@@ -18,7 +18,7 @@
     interface IncomeContextType {
       incomes: Income[];
       addIncome: (income: Omit<Income, 'id' | 'user_id' | 'created_at'>) => Promise<void>;
-      updateIncome: (id: string, updates: Partial<Omit<Income, 'id' | 'user_id' | 'created_at'>) => Promise<void>;
+  updateIncome: (id: string, updates: Partial<Omit<Income, 'id' | 'user_id' | 'created_at'>>) => Promise<void>;
       deleteIncome: (id: string) => Promise<void>;
       getIncomes: () => Promise<void>;
       isLoading: boolean;
@@ -35,9 +35,10 @@
     };
 
     export const IncomeProvider = ({ children }: { children: React.ReactNode }) => {
-      const [incomes, setIncomes] = useState<Income[]>([]);
-      const [isLoading, setIsLoading] = useState(false);
-      const { supabase, user } = useAuth();
+  const [incomes, setIncomes] = useState<Income[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+  const supabase = getBrowserSupabase();
 
       const getIncomes = useCallback(async () => {
         if (user && supabase) {
@@ -64,6 +65,15 @@
         getIncomes();
       }, [getIncomes, supabase, user]);
 
+      // refresh when an income is added via the add page
+      useEffect(() => {
+        const handler = () => { getIncomes(); };
+        if (typeof window !== 'undefined') {
+          window.addEventListener('paisa_income_added', handler);
+        }
+        return () => { if (typeof window !== 'undefined') { window.removeEventListener('paisa_income_added', handler); } };
+      }, [getIncomes]);
+
       const addIncome = async (incomeData: Omit<Income, 'id' | 'user_id' | 'created_at'>) => {
         if (supabase && user) {
           setIsLoading(true);
@@ -89,7 +99,7 @@
         }
       };
 
-      const updateIncome = async (id: string, updates: Partial<Omit<Income, 'id' | 'user_id' | 'created_at'>) => {
+  const updateIncome = async (id: string, updates: Partial<Omit<Income, 'id' | 'user_id' | 'created_at'>>) => {
         if (supabase && user) {
           setIsLoading(true);
           try {

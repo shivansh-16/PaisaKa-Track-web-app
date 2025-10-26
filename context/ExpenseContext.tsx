@@ -28,7 +28,7 @@
       expenses: Expense[];
       groups: Group[];
       addExpense: (expense: Omit<Expense, 'id' | 'user_id' | 'created_at'>) => Promise<void>;
-      updateExpense: (id: string, updates: Partial<Omit<Expense, 'id' | 'user_id' | 'created_at'>) => Promise<void>;
+  updateExpense: (id: string, updates: Partial<Omit<Expense, 'id' | 'user_id' | 'created_at'>>) => Promise<void>;
       deleteExpense: (id: string) => Promise<void>;
       getExpenses: () => Promise<void>;
       getTotalBalance: () => number;
@@ -58,21 +58,30 @@
           setIsLoading(true);
           try {
             const { data, error } = await supabase
-              .from('expenses')
-              .select('*')
+              .from('transactions')
+              .select(`id,type,amount,title,description:note,occurred_at,created_at,user_id,categories(id,name_en,name_hi)`)
               .eq('user_id', user.id)
               .order('occurred_at', { ascending: false });
 
             if (error) {
-              console.error('Error fetching expenses:', error);
+              console.error('Error fetching transactions:', error);
             }
 
-            // Separate incomes and expenses
-            const updatedExpenses = data ? data.map((item: any) => ({
-              ...item,
-              type: item.amount > 0 ? 'income' : 'expense', // Determine type based on amount
-              amount: Math.abs(item.amount) // Store amount as absolute value
-            })) : [];
+            const updatedExpenses = (data || []).map((item: any) => ({
+              id: item.id,
+              user_id: item.user_id,
+              amount: Math.abs(item.amount),
+              category: (() => {
+                const c = item.categories;
+                const cat = Array.isArray(c) ? c[0] : c;
+                return cat ? (cat.name_en || cat.name_hi) : null;
+              })(),
+              title: item.title || null,
+              description: item.description || item.note || null,
+              occurred_at: item.occurred_at,
+              created_at: item.created_at,
+              type: item.type || (item.amount > 0 ? 'income' : 'expense'),
+            })) as Expense[];
 
             setExpenses(updatedExpenses);
           } finally {
@@ -85,24 +94,55 @@
         getExpenses();
       }, [getExpenses]);
 
+      // Listen for global event when a transaction is added elsewhere (e.g., via API)
+      useEffect(() => {
+        const handler = () => { getExpenses(); };
+        if (typeof window !== 'undefined') {
+          window.addEventListener('paisa_expense_added', handler);
+        }
+        return () => { if (typeof window !== 'undefined') { window.removeEventListener('paisa_expense_added', handler); } };
+      }, [getExpenses]);
+
       const addExpense = async (expenseData: Omit<Expense, 'id' | 'user_id' | 'created_at'>) => {
         if (user) {
           setIsLoading(true);
           try {
+            const insert = {
+              user_id: user.id,
+              type: 'expense',
+              amount: expenseData.amount,
+              currency: 'INR',
+              category_id: null,
+              payment_method: null,
+              note: expenseData.description ?? null,
+              occurred_at: expenseData.occurred_at,
+              title: expenseData.title ?? null,
+            };
+
             const { data, error } = await supabase
-              .from('expenses')
-              .insert([
-                {
-                  user_id: user.id,
-                  ...expenseData,
-                },
-              ])
-              .select('*');
+              .from('transactions')
+              .insert([insert])
+              .select('*')
+              .single();
 
             if (error) {
-              console.error('Error adding expense:', error);
+              console.error('Error adding transaction:', error);
             } else if (data) {
-              setExpenses([...expenses, data[0] as Expense]);
+              // refresh list or append
+              setExpenses(prev => [
+                {
+                  id: data.id,
+                  user_id: data.user_id,
+                  amount: Math.abs(data.amount),
+                  category: data.category_id ?? null,
+                  title: data.title ?? null,
+                  description: data.note ?? null,
+                  occurred_at: data.occurred_at,
+                  created_at: data.created_at,
+                  type: data.type || 'expense',
+                },
+                ...prev,
+              ]);
             }
           } finally {
             setIsLoading(false);
@@ -110,12 +150,12 @@
         }
       };
 
-      const updateExpense = async (id: string, updates: Partial<Omit<Expense, 'id' | 'user_id' | 'created_at'>) => {
+      const updateExpense = async (id: string, updates: Partial<Omit<Expense, 'id' | 'user_id' | 'created_at'>>) => {
         if (user) {
           setIsLoading(true);
           try {
             const { data, error } = await supabase
-              .from('expenses')
+              .from('transactions')
               .update(updates)
               .eq('id', id)
               .select('*');
@@ -136,7 +176,7 @@
           setIsLoading(true);
           try {
             const { error } = await supabase
-              .from('expenses')
+              .from('transactions')
               .delete()
               .eq('id', id);
 

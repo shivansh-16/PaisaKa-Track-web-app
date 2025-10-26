@@ -3,7 +3,9 @@ import { getServerSupabase } from '@/lib/db';
 
     export async function POST(req: Request) {
       try {
-        const supabase = getServerSupabase();
+        const authHeader = req.headers.get('authorization') || '';
+        const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+        const supabase = getServerSupabase(token);
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
@@ -55,7 +57,9 @@ import { getServerSupabase } from '@/lib/db';
 
     export async function GET(req: Request) {
       try {
-        const supabase = getServerSupabase();
+        const authHeader = req.headers.get('authorization') || '';
+        const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+        const supabase = getServerSupabase(token);
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {

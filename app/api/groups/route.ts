@@ -1,10 +1,10 @@
 import { requireUser } from "@/lib/auth";
-import { getServerSupabase } from "@/lib/db";
+import { getServerSupabaseFromRequest } from "@/lib/db";
 
 export async function GET(req: Request) {
   const { user, response } = await requireUser(req);
   if (!user) return response as Response;
-  const supabase = getServerSupabase();
+  const supabase = getServerSupabaseFromRequest(req);
   try {
     // 1. Get the list of group IDs where the user is a member
     const { data: memberGroupLinks, error: memberGroupsError } = await supabase

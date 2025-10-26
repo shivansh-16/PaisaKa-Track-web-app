@@ -1,5 +1,3 @@
-'use client';
-
     import type { Metadata } from 'next';
     import { Inter } from 'next/font/google';
     import './globals.css';
@@ -8,6 +6,7 @@
     import { ExpenseProvider } from '@/context/ExpenseContext';
     import { IncomeProvider } from '@/context/IncomeContext';
     import { TotalBalanceProvider } from '@/context/TotalBalanceContext';
+    import { cookies } from 'next/headers';
 
     const inter = Inter({ subsets: ['latin'] });
 
@@ -16,13 +15,18 @@
       description: 'Track your expenses and incomes',
     };
 
-    export default function RootLayout({
+    export default async function RootLayout({
       children,
     }: {
       children: React.ReactNode;
     }) {
+      // read the paisaka_lang cookie server-side and set html lang accordingly
+      const cookieStore = await cookies();
+      const cookieLang = cookieStore.get('paisaka_lang')?.value;
+      const lang = cookieLang === 'hi' ? 'hi' : 'en';
+
       return (
-        <html lang="en">
+        <html lang={lang}>
           <body className={inter.className}>
             <AuthProvider>
               <LanguageProvider>

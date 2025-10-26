@@ -37,9 +37,9 @@ export default function Analytics() {
   const stats = useMemo(() => {
     const now = Date.now();
     const ms = period === '30d' ? 30*24*60*60*1000 : period === '90d' ? 90*24*60*60*1000 : period === '1y' ? 365*24*60*60*1000 : Infinity;
-    const filtered = expenses.filter(e => (now - new Date(e.date).getTime()) <= ms);
-    const totalExpense = smallSum(filtered, (t) => t.amount < 0) * -1;
-    const totalIncome = smallSum(filtered, (t) => t.amount > 0);
+  const filtered = expenses.filter(e => (now - new Date(e.occurred_at).getTime()) <= ms);
+  const totalExpense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount || 0), 0);
+  const totalIncome = filtered.filter(t => t.type === 'income').reduce((s, t) => s + Math.abs(t.amount || 0), 0);
     const savingsRate = totalIncome > 0 ? Math.max(0, ((totalIncome - totalExpense) / totalIncome) * 100) : 0;
     const byCategory: Record<string, number> = {};
     filtered.forEach(e => { const cat = e.category || 'Misc'; byCategory[cat] = (byCategory[cat] || 0) + Math.abs(e.amount); });
@@ -47,7 +47,7 @@ export default function Analytics() {
     const spark = Array.from({length:12}).map((_,i) => {
       // naive monthly slice for sparkline
       const slice = filtered.filter((f) => {
-        const d = new Date(f.date);
+        const d = new Date(f.occurred_at);
         return d.getMonth() === ((new Date()).getMonth() - (11 - i) + 12) % 12;
       });
       return slice.reduce((s, t) => s + Math.abs(t.amount), 0);
@@ -60,7 +60,7 @@ export default function Analytics() {
   const downloadCSV = () => {
     const rows: string[][] = [['date','amount','category','description']].concat(
       expenses.map(e => [
-        new Date(e.date).toLocaleDateString('en-IN'),
+        new Date(e.occurred_at).toLocaleDateString('en-IN'),
         String(e.amount),
         String(e.category || ''),
         String(e.description || '')

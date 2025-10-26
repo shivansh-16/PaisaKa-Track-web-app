@@ -27,3 +27,14 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
           : undefined,
       });
     }
+
+    /**
+     * Extracts the Authorization bearer token from a Request and returns a server
+     * Supabase client configured with that token so auth.getUser() and RLS queries
+     * run in the context of the requesting user.
+     */
+    export function getServerSupabaseFromRequest(req: Request): SupabaseClient {
+      const authHeader = req.headers.get('authorization') || req.headers.get('Authorization') || '';
+      const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : undefined;
+      return getServerSupabase(token);
+    }

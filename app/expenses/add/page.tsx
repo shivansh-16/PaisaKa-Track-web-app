@@ -89,6 +89,8 @@
             body: JSON.stringify(payload),
           });
           if (!res.ok) throw new Error('Failed to save');
+          // notify other parts of the app to refresh expenses (ExpenseProvider listens for this)
+          try { window.dispatchEvent(new Event('paisa_expense_added')); } catch (e) { /* ignore */ }
           router.push('/');
         } catch (err) {
           setError('Failed to add expense. Please try again.');

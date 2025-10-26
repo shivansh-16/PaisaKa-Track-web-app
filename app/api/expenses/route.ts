@@ -1,12 +1,12 @@
 import { requireUser } from "@/lib/auth";
-import { getServerSupabase } from "@/lib/db";
+import { getServerSupabaseFromRequest } from "@/lib/db";
 
 export async function GET(req: Request) {
   const { user, response } = await requireUser(req);
   if (!user) return response as Response;
   const url = new URL(req.url);
   const limit = Math.min(Number(url.searchParams.get("limit") || 25), 100);
-  const supabase = getServerSupabase();
+  const supabase = getServerSupabaseFromRequest(req);
   try {
     const { data, error } = await supabase
       .from("transactions")
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
   if (body.amount <= 0) {
     return new Response(JSON.stringify({ error: "Amount must be greater than zero" }), { status: 400 });
   }
-  const supabase = getServerSupabase();
+  const supabase = getServerSupabaseFromRequest(req);
   try {
     let categoryId = body.category ?? null;
 

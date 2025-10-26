@@ -28,7 +28,12 @@
         return null;
       }
 
-      const totalBalance = getTotalBalance();
+      // Compute total balance using incomes (from incomes table) and expenses (from transactions)
+      const totalIncome = incomes.reduce((s, i) => s + (i.amount || 0), 0);
+      const totalExpense = expenses
+        .filter(e => e.type === 'expense')
+        .reduce((s, e) => s + (e.amount || 0), 0);
+      const totalBalance = totalIncome - totalExpense;
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
       const monthlySpending = getMonthlySpending(currentMonth, currentYear);
@@ -36,10 +41,10 @@
       const recentExpenses = expenses
         .filter(expense => expense.type === 'expense')
         .sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime())
-        .slice(0, 4);
+        .slice(0, 3);
 
       const recentIncomes = incomes
-        .sort((a, b) => new Date(b.occurred_at).getTime() - Date(a.occurred_at).getTime())
+        .sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime())
         .slice(0, 4);
 
       return (
@@ -86,6 +91,7 @@
                 <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
                   <div className="w-full h-full rounded-full" style={{ background: 'white' }}></div>
                 </div>
+                
               </section>
 
               {/* Quick Action Buttons */}
