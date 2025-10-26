@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/auth";
 import { getServerSupabaseFromRequest } from "@/lib/db";
+import { MAX_EXPENSE_AMOUNT } from '@/lib/constants';
 
 export async function GET(req: Request) {
   const { user, response } = await requireUser(req);
@@ -63,6 +64,15 @@ export async function POST(req: Request) {
   }
   const supabase = getServerSupabaseFromRequest(req);
   try {
+    // server-side guard: prevent numeric overflow and enforce policy limits
+    const amt = Number(body.amount);
+    if (!Number.isFinite(amt) || Math.abs(amt) <= 0) {
+      return new Response(JSON.stringify({ error: 'Invalid amount' }), { status: 400 });
+    }
+    if (Math.abs(amt) > MAX_EXPENSE_AMOUNT) {
+      return new Response(JSON.stringify({ error: `Expense exceeds the allowed limit (₹${MAX_EXPENSE_AMOUNT.toLocaleString()}).` }), { status: 400 });
+    }
+
     let categoryId = body.category ?? null;
 
     // If category is a string, attempt to resolve it to an ID

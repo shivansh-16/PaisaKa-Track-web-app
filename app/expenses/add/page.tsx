@@ -59,6 +59,18 @@
           return;
         }
 
+        // Frontend guard: validate against MAX_EXPENSE_AMOUNT
+        const { MAX_EXPENSE_AMOUNT } = await import('@/lib/constants');
+        if (Math.abs(amountValue) > MAX_EXPENSE_AMOUNT) {
+          const msg = lang === 'hi'
+            ? `राशि अधिक है। कृपया ₹${MAX_EXPENSE_AMOUNT.toLocaleString()} से कम राशि दर्ज करें।`
+            : `Amount too high. Please enter a value below ₹${MAX_EXPENSE_AMOUNT.toLocaleString()} for expenses.`;
+          try { window.dispatchEvent(new CustomEvent('toast', { detail: { message: msg } })); } catch (e) { /* ignore */ }
+          setError(msg);
+          setIsLoading(false);
+          return;
+        }
+
         try {
           // Validate amount is a proper number
           const amountValue = parseFloat(formData.amount);

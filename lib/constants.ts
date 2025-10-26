@@ -27,3 +27,8 @@ export const IMAGE_COMPRESSION_QUALITY = parseNumber(process.env.IMAGE_COMPRESSI
 export const ALLOWED_FILE_TYPES = (process.env.ALLOWED_FILE_TYPES || "image/jpeg,image/png,image/webp,application/pdf")
 	.split(",")
 	.map((t) => t.trim());
+
+// Monetary limits (defaults): expressed in smallest currency units (Rupees)
+// Defaults: 10 Crore (100,000,000) for expenses, 25 Crore (250,000,000) for incomes
+export const MAX_EXPENSE_AMOUNT = parseNumber(process.env.MAX_EXPENSE_AMOUNT, 100_000_000);
+export const MAX_INCOME_AMOUNT = parseNumber(process.env.MAX_INCOME_AMOUNT, 250_000_000);

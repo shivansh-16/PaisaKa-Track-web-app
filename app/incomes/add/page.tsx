@@ -66,6 +66,18 @@
             return;
           }
 
+          // Frontend guard: validate against MAX_INCOME_AMOUNT
+          const { MAX_INCOME_AMOUNT } = await import('@/lib/constants');
+          if (Math.abs(amountValue) > MAX_INCOME_AMOUNT) {
+            const msg = lang === 'hi'
+              ? `राशि अधिक है। कृपया ₹${MAX_INCOME_AMOUNT.toLocaleString()} से कम राशि दर्ज करें।`
+              : `Amount too high. Please enter a value below ₹${MAX_INCOME_AMOUNT.toLocaleString()} for incomes.`;
+            try { window.dispatchEvent(new CustomEvent('toast', { detail: { message: msg } })); } catch (e) { /* ignore */ }
+            setError(msg);
+            setIsLoading(false);
+            return;
+          }
+
           const payload = {
             amount: Math.abs(amountValue),
             category: formData.category,

@@ -1,4 +1,5 @@
 import { getServerSupabase } from '@/lib/db';
+import { MAX_INCOME_AMOUNT } from '@/lib/constants';
     import { NextResponse } from 'next/server';
 
     export async function POST(req: Request) {
@@ -18,6 +19,15 @@ import { getServerSupabase } from '@/lib/db';
         }
 
         const { amount, category, title, note, occurred_at } = await req.json();
+
+        // server-side guard: validate amount and enforce max income limit
+        const amt = Number(amount);
+        if (!Number.isFinite(amt) || Math.abs(amt) <= 0) {
+          return new NextResponse(JSON.stringify({ error: 'Invalid amount' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        if (Math.abs(amt) > MAX_INCOME_AMOUNT) {
+          return new NextResponse(JSON.stringify({ error: `Income exceeds the allowed limit (₹${MAX_INCOME_AMOUNT.toLocaleString()}).` }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
 
         const { data, error } = await supabase
           .from('incomes')
