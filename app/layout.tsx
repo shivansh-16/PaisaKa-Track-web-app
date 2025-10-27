@@ -6,6 +6,7 @@
     import { ExpenseProvider } from '@/context/ExpenseContext';
     import { IncomeProvider } from '@/context/IncomeContext';
     import { TotalBalanceProvider } from '@/context/TotalBalanceContext';
+    import ClientBottomNavWrapper from '@/components/layout/ClientBottomNavWrapper';
     import { cookies } from 'next/headers';
 
     const inter = Inter({ subsets: ['latin'] });
@@ -34,6 +35,7 @@
                   <IncomeProvider>
                     <TotalBalanceProvider>
                       {children}
+                      <ClientBottomNavWrapper />
                     </TotalBalanceProvider>
                   </IncomeProvider>
                 </ExpenseProvider>

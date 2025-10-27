@@ -157,13 +157,13 @@
                   {[
                     { emoji: '🍕', name: lang === 'hi' ? 'भोजन' : 'Food' },
                     { emoji: '🚗', name: lang === 'hi' ? 'यातायात' : 'Transport' },
-                    { emoji: '☕', name: lang === 'hi' ? 'चाय' : 'Tea' },
                     { emoji: '🎬', name: lang === 'hi' ? 'मनोरंजन' : 'Movies' },
                     { emoji: '🏥', name: lang === 'hi' ? 'चिकित्सा' : 'Medical' },
                     { emoji: '🛒', name: lang === 'hi' ? 'खरीदारी' : 'Shopping' },
                     { emoji: '👕', name: lang === 'hi' ? 'कपड़े' : 'Clothes' },
                     { emoji: '💡', name: lang === 'hi' ? 'बिल' : 'Bills' },
                     { emoji: '🎓', name: lang === 'hi' ? 'शिक्षा' : 'Education' },
+                    { emoji: '📦', name: lang === 'hi' ? 'अन्य' : 'Other' },
                   ].map((category) => (
                     <button
                       key={category.name}
