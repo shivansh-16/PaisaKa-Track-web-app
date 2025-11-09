@@ -1,61 +1,129 @@
-# PaisaKa Track - Web App
+# PaisaKa Track
 
-## Local Setup
+A modern, user-friendly expense and income tracking web application built with Next.js, React, and Supabase. Track your personal finances, manage group expenses, and gain insights into your spending habits.
 
-1. Copy `.env.example` to `.env.local` and fill values:
-   - `SUPABASE_PROJECT_URL`, `SUPABASE_ANON_KEY` (required to run)
-   - Optional: `SUPABASE_SERVICE_ROLE_KEY` for server tasks
-   - Keep `DEFAULT_TIMEZONE=Asia/Kolkata` and `DEFAULT_CURRENCY=INR`
+## Features
+
+- **Personal Expense Tracking**: Log and categorize your daily expenses and income
+- **Group Expense Management**: Create groups and split expenses with friends or family
+- **Real-time Analytics**: View spending trends and budget insights
+- **Receipt Upload**: Attach receipts to expenses for better record-keeping
+- **Voice Input**: Add expenses using voice commands
+- **Multi-language Support**: Available in English and Hindi
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Secure Authentication**: User authentication with Supabase
+- **Real-time Updates**: Live updates for group activities and balances
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (version 18 or higher)
+- npm or yarn
+- Supabase account
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd paisaka-track-web-app
+   ```
+
 2. Install dependencies:
    ```bash
-   npm ci
+   npm install
    ```
-3. Run dev server:
-```bash
-npm run dev
+
+3. Set up Supabase:
+   - Follow the detailed setup guide in [`docs/SETUP_SUPABASE.md`](docs/SETUP_SUPABASE.md)
+   - Create a new Supabase project
+   - Configure authentication and storage
+   - Run the provided SQL scripts
+
+4. Configure environment variables:
+   Create a `.env.local` file in the root directory with:
    ```
-4. Open http://localhost:3000
+   SUPABASE_PROJECT_URL=your_supabase_project_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+   SUPABASE_BUCKET_NAME=paisaka-receipts
+   DEFAULT_TIMEZONE=Asia/Kolkata
+   SUPPORTED_LANGUAGES=en,hi
+   ```
 
-## CI
-GitHub Actions runs lint, tests, and build on PRs to `main`. Configure repo secrets:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+5. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-## Supabase Usage
-The Supabase client is exposed via:
-- `lib/db.ts` → `getBrowserSupabase()` and `getServerSupabase()`
-- `lib/auth.ts` → `getUserFromRequest()` and `requireUser()`
-- `lib/constants.ts` → environment-backed config (timezone, languages, limits)
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Database & RLS (Supabase)
-Apply SQL in order using Supabase SQL editor:
-1. `supabase/schema.sql`
-2. `supabase/policies.sql`
-3. `supabase/seed.sql`
+## Usage
 
-## Storage (Supabase)
-- Create bucket: `paisaka-receipts` (private)
-- Allowed types: image/jpeg, image/png, image/webp, application/pdf
-- API endpoints:
-  - `POST /api/files` → returns `{ path, signedUrl, token }` for direct upload
-  - `GET /api/files?path=...` → returns signed download URL
+### For Users
 
-## Deployment
-- Vercel:
-  - Add env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - Add server env vars as needed: `SUPABASE_SERVICE_ROLE_KEY` (server-only)
-  - Set build command: `npm run build`; output: `.next`
-- Supabase: ensure RLS enabled; rotate keys before go-live
+1. **Sign Up/Login**: Create an account or log in with your existing credentials
+2. **Dashboard**: View your financial overview, recent transactions, and analytics
+3. **Add Expenses**: Use the expense form or voice input to log transactions
+4. **Manage Groups**: Create groups for shared expenses and split costs
+5. **Track Income**: Record your income sources for complete financial tracking
+6. **View Analytics**: Analyze your spending patterns and budget performance
 
-## Docs
-- See `docs/SETUP_SUPABASE.md` for backend setup
+### Key Pages
 
-## Conventions
-- Timezone default: Asia/Kolkata
-- Supported languages: en, hi
-- Storage bucket: `paisaka-receipts`
+- `/dashboard`: Main dashboard with financial overview
+- `/expenses`: View and manage personal expenses
+- `/groups`: Manage expense-sharing groups
+- `/income`: Track income sources
+- `/profile`: User profile and settings
 
-## Next steps
-- Implement database schema and RLS in Supabase
-- Integrate auth routes and secure API handlers
-- Replace static data with live queries
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, Storage, Real-time)
+- **Icons**: Lucide React
+- **Testing**: Vitest
+- **Linting**: ESLint
+
+## Scripts
+
+- `npm run dev`: Start development server with Turbopack
+- `npm run build`: Build for production
+- `npm run start`: Start production server
+- `npm run lint`: Run ESLint
+- `npm test`: Run tests with Vitest
+
+## Security
+
+This application follows security best practices:
+- Row Level Security (RLS) enforced on all database tables
+- Private storage buckets with signed URLs
+- Server-side environment variable management
+- Input validation on API routes
+
+For detailed security information, see [`docs/SECURITY.md`](docs/SECURITY.md).
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is private and proprietary.
+
+## Support
+
+For support or questions:
+- Check the documentation in the `docs/` folder
+- Open an issue in the repository
+- Contact the development team
+
+---
+
+Built with ❤️ for better financial management

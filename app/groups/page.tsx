@@ -70,7 +70,7 @@ export default function Groups() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 mt-4">
-            <a href="/groups/1/expenses/add" className="pk-button-primary flex items-center justify-center gap-3 p-4">
+            <a href="" className="pk-button-primary flex items-center justify-center gap-3 p-4">
               <div className="text-2xl"><Image src="/add.svg" width={25} height={25} alt="Add Expense" /></div>
               <div className="text-[14] font-medium">ADD EXPENSE</div>
             </a>
