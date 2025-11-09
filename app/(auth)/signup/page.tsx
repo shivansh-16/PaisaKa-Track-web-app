@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getBrowserSupabase } from '@/lib/db';
@@ -64,7 +65,7 @@ export default function Signup() {
           setError(result.error || 'Signup failed. Please try again.');
         }
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Signup failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -84,9 +85,9 @@ export default function Signup() {
     <div className="min-h-dvh px-4 py-6 sm:px-6 md:px-8" style={{ background: 'var(--pk-bg)' }}>
       {/* Header */}
       <header className="flex items-center justify-between mb-8">
-        <a href="/welcome" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
+        <Link href="/welcome" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
           ←
-        </a>
+        </Link>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center text-lg" style={{ background: 'var(--pk-orange)' }}>
             ₹
@@ -210,7 +211,7 @@ export default function Signup() {
               className="mt-1" 
             />
             <p className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>
-              I agree to the <a href="#" className="font-medium" style={{ color: 'var(--pk-orange)' }}>Terms & Conditions</a> and <a href="#" className="font-medium" style={{ color: 'var(--pk-orange)' }}>Privacy Policy</a>
+              I agree to the <Link href="#" className="font-medium" style={{ color: 'var(--pk-orange)' }}>Terms & Conditions</Link> and <Link href="#" className="font-medium" style={{ color: 'var(--pk-orange)' }}>Privacy Policy</Link>
             </p>
           </div>
 
@@ -239,7 +240,7 @@ export default function Signup() {
         {/* Login Link */}
         <div className="text-center">
           <span className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>Already have an account? </span>
-          <a href="/login" className="text-sm font-medium" style={{ color: 'var(--pk-orange)' }}>Login</a>
+          <Link href="/login" className="text-sm font-medium" style={{ color: 'var(--pk-orange)' }}>Login</Link>
         </div>
       </main>
     </div>

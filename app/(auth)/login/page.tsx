@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
@@ -26,7 +27,7 @@ export default function Login() {
       } else {
         setError('Invalid email or password. Please check your credentials.');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Login failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -36,9 +37,9 @@ export default function Login() {
     <div className="min-h-dvh px-4 py-6 sm:px-6 md:px-8" style={{ background: 'var(--pk-bg)' }}>
       {/* Header */}
       <header className="flex items-center justify-between mb-8">
-        <a href="/welcome" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
+        <Link href="/welcome" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
           ←
-        </a>
+        </Link>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center text-lg" style={{ background: 'var(--pk-orange)' }}>
             ₹
@@ -107,7 +108,7 @@ export default function Login() {
           </button>
 
           <div className="text-center">
-            <a href="#" className="text-sm" style={{ color: 'var(--pk-orange)' }}>Forgot Password?</a>
+            <Link href="#" className="text-sm" style={{ color: 'var(--pk-orange)' }}>Forgot Password?</Link>
           </div>
         </form>
 
@@ -127,7 +128,7 @@ export default function Login() {
         {/* Sign Up Link */}
         <div className="text-center">
           <span className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>Don't have an account? </span>
-          <a href="/signup" className="text-sm font-medium" style={{ color: 'var(--pk-orange)' }}>Sign Up</a>
+          <Link href="/signup" className="text-sm font-medium" style={{ color: 'var(--pk-orange)' }}>Sign Up</Link>
         </div>
       </main>
     </div>

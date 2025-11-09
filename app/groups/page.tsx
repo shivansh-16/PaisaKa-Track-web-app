@@ -1,5 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import Protected from '@/components/Protected'
 
 export default function Groups() {
@@ -8,9 +9,9 @@ export default function Groups() {
     <div className="min-h-dvh px-4 py-6 sm:px-6 md:px-8" style={{ background: 'var(--pk-bg)' }}>
       {/* Header */}
       <header className="flex items-center justify-between mb-6">
-        <a href="/" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
+        <Link href="/" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
           ←
-        </a>
+        </Link>
         <h1 className="text-xl font-bold" style={{ color: 'var(--pk-text-primary)' }}>Groups / ग्रुप्स</h1>
         <button className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
           ➕
@@ -70,14 +71,14 @@ export default function Groups() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 mt-4">
-            <a href="" className="pk-button-primary flex items-center justify-center gap-3 p-4">
+            <Link href="" className="pk-button-primary flex items-center justify-center gap-3 p-4">
               <div className="text-2xl"><Image src="/add.svg" width={25} height={25} alt="Add Expense" /></div>
               <div className="text-[14] font-medium">ADD EXPENSE</div>
-            </a>
-            <a href="/groups/split/1" className="pk-button-secondary flex items-center justify-center gap-3 p-4">
+            </Link>
+            <Link href="/groups/split/1" className="pk-button-secondary flex items-center justify-center gap-3 p-4">
               <div className="text-2xl"><Image src="/money.svg" width={25} height={25} alt="Add Expense" /></div>
               <div className="text-[14] font-medium">SPLIT EXPENSE</div>
-            </a>
+            </Link>
           </div>
         </section>
 

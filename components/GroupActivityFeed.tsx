@@ -6,7 +6,7 @@ import { subscribeToActivityFeed } from '@/lib/realtime';
 interface ActivityItem {
 	id: string;
 	action: string;
-	metadata: any;
+	metadata: { amount?: number; description?: string };
 	actor_id: string | null;
 	created_at: string;
 }
@@ -24,8 +24,8 @@ export default function GroupActivityFeed({ groupId }: { groupId: string }) {
 			if (!res.ok) throw new Error(`Failed: ${res.status}`);
 			const data = await res.json();
 			setItems(data.items || []);
-		} catch (e: any) {
-			setError(e.message || 'Error fetching activity');
+		} catch (e: unknown) {
+			setError(e instanceof Error ? e.message : 'Error fetching activity');
 		} finally {
 			setLoading(false);
 		}

@@ -11,9 +11,10 @@ export default function RealtimeSubscriber() {
 		const unsubTx = subscribeToUserTransactions(user.id, () => {
 			window.dispatchEvent(new Event('expenses-changed'));
 		});
-		const unsubNotif = subscribeToNotifications(user.id, (payload: any) => {
-			if (payload?.eventType === 'INSERT' && payload?.new?.type === 'budget_alert') {
-				window.dispatchEvent(new CustomEvent('toast', { detail: { message: payload.new.message } }));
+		const unsubNotif = subscribeToNotifications(user.id, (payload: unknown) => {
+			const p = payload as { eventType?: string; new?: { type?: string; message?: string } };
+			if (p?.eventType === 'INSERT' && p?.new?.type === 'budget_alert') {
+				window.dispatchEvent(new CustomEvent('toast', { detail: { message: p.new.message } }));
 			}
 		});
 		return () => { unsubTx(); unsubNotif(); };

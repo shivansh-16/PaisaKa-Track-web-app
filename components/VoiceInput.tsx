@@ -21,21 +21,23 @@ export default function VoiceInput({ onTranscript, placeholder = "Speak now...",
     setIsSupported(true);
     setIsListening(true);
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = (window as { SpeechRecognition?: any; webkitSpeechRecognition?: any }).SpeechRecognition || (window as { SpeechRecognition?: any; webkitSpeechRecognition?: any }).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
 
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'en-IN'; // Indian English
 
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
+    recognition.onresult = (event: unknown) => {
+      const e = event as { results: { [0]: { [0]: { transcript: string } } } };
+      const transcript = e.results[0][0].transcript;
       onTranscript(transcript);
       setIsListening(false);
     };
 
-    recognition.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error);
+    recognition.onerror = (event: unknown) => {
+      const e = event as { error: string };
+      console.error('Speech recognition error:', e.error);
       setIsListening(false);
     };
 

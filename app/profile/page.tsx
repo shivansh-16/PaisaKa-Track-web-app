@@ -6,7 +6,7 @@ import Protected from '@/components/Protected';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
 
-function NameEditor({ user, updateProfile }: { user: any; updateProfile: (u: Partial<any>) => Promise<boolean> }) {
+function NameEditor({ user, updateProfile }: { user: { name?: string; email?: string | null; phone?: string | null } | null; updateProfile: (u: Partial<{ name?: string }>) => Promise<boolean> }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [busy, setBusy] = useState(false);

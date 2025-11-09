@@ -9,8 +9,8 @@ function formatCurrency(v: number) {
   return `₹${v.toLocaleString('en-IN')}`;
 }
 
-function smallSum(items: any[], predicate: (t: any) => boolean) {
-  return items.filter(predicate).reduce((s, t) => s + Number(t.amount || 0), 0);
+function smallSum(items: unknown[], predicate: (t: unknown) => boolean) {
+  return items.filter(predicate).reduce((s: number, t) => s + Number((t as { amount?: number }).amount || 0), 0);
 }
 
 function Sparkline({ points }: { points: number[] }) {
@@ -82,7 +82,7 @@ export default function Analytics() {
           <div className="text-sm text-slate-500">{user?.name ?? user?.email}</div>
         </div>
         <div className="flex items-center gap-2">
-          <select value={period} onChange={(e) => setPeriod(e.target.value as any)} className="p-2 rounded border" style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)' }}>
+          <select value={period} onChange={(e) => setPeriod(e.target.value as '30d'|'90d'|'1y'|'all')} className="p-2 rounded border" style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)' }}>
             <option value="30d">30d</option>
             <option value="90d">90d</option>
             <option value="1y">1y</option>
@@ -146,15 +146,18 @@ export default function Analytics() {
             <h3 className="pk-section-title mb-3">{T('analytics.topSpends')}</h3>
             {stats.top.length === 0 ? <div className="text-sm text-slate-500">{T('analytics.noData')}</div> : (
               <ol className="list-decimal pl-5 space-y-2">
-                {stats.top.map((t:any) => (
-                  <li key={t.id} className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">{t.category}</div>
-                      <div className="text-sm text-slate-500">{t.description || ''}</div>
-                    </div>
-                    <div className="font-bold" style={{ color: 'var(--pk-text-primary)' }}>{formatCurrency(Math.abs(t.amount))}</div>
-                  </li>
-                ))}
+                {stats.top.map((t: unknown) => {
+                  const item = t as { id: string; category?: string; description?: string; amount?: number };
+                  return (
+                    <li key={item.id} className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium">{item.category}</div>
+                        <div className="text-sm text-slate-500">{item.description || ''}</div>
+                      </div>
+                      <div className="font-bold" style={{ color: 'var(--pk-text-primary)' }}>{formatCurrency(Math.abs(item.amount || 0))}</div>
+                    </li>
+                  );
+                })}
               </ol>
             )}
           </div>

@@ -38,9 +38,10 @@ export async function GET(req: Request) {
     }
 
     return new Response(JSON.stringify({ items: data }), { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Unexpected error in /api/expenses:", error);
-    return new Response(JSON.stringify({ error: error.message || "Internal Server Error" }), { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
+    return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
   }
 }
 
@@ -129,8 +130,9 @@ export async function POST(req: Request) {
     }
 
     return new Response(JSON.stringify(data), { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Unexpected error in /api/expenses POST:", error);
-    return new Response(JSON.stringify({ error: error.message || "Internal Server Error" }), { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
+    return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
   }
 }

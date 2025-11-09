@@ -1,6 +1,7 @@
 'use client';
 
     import Image from 'next/image';
+    import Link from 'next/link';
     import { useAuth } from '@/context/AuthContext';
     import { useExpenses } from '@/context/ExpenseContext';
     import { useIncomes } from '@/context/IncomeContext';
@@ -15,7 +16,7 @@
       const { user, isLoading: authLoading } = useAuth();
       const { expenses, groups, getTotalBalance, getMonthlySpending, isLoading: expenseLoading } = useExpenses();
       const { incomes, isLoading: incomeLoading } = useIncomes();
-      const { lang } = useLanguage();
+      const { lang: _lang } = useLanguage();
       const router = useRouter();
 
       useEffect(() => {
@@ -66,12 +67,12 @@
                 >
                   🔔
                 </button>
-                <a
+                <Link
                   href="/profile"
                   className="p-2 rounded-full hover:bg-gray-100 transition-colors"
                 >
                   <User />
-                </a>
+                </Link>
               </div>
             </header>
 
@@ -96,14 +97,14 @@
 
               {/* Quick Action Buttons */}
               <section className="grid grid-cols-2 gap-4">
-                <a href="/expenses/add" className="pk-button-primary h-20 flex flex-col items-center justify-center gap-2">
+                <Link href="/expenses/add" className="pk-button-primary h-20 flex flex-col items-center justify-center gap-2">
                   <div className="text-2xl"><Image src="/add.svg" width={20} height={20} alt="Add Expense" /></div>
                   <div className="text-sm font-medium">Add Expense</div>
-                </a>
-                <a href="/incomes/add" className="pk-button-primary h-20 flex flex-col items-center justify-center gap-2">
+                </Link>
+                <Link href="/incomes/add" className="pk-button-primary h-20 flex flex-col items-center justify-center gap-2">
                   <div className="text-2xl"><Image src="/add.svg" width={20} height={20} alt="Add Income" /></div>
                   <div className="text-sm font-medium">Add Income</div>
-                </a>
+                </Link>
               </section>
 
               {/* Recent Expenses */}

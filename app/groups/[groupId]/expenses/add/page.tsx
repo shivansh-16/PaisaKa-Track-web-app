@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import VoiceInput from '@/components/VoiceInput';
 
 export default function AddGroupExpense() {
@@ -5,9 +6,9 @@ export default function AddGroupExpense() {
     <div className="min-h-dvh px-4 py-6 sm:px-6 md:px-8" style={{ background: 'var(--pk-bg)' }}>
       {/* Header */}
       <header className="flex items-center justify-between mb-6">
-        <a href="/groups" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
+        <Link href="/groups" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
           ←
-        </a>
+        </Link>
         <h1 className="text-xl font-bold" style={{ color: 'var(--pk-text-primary)' }}>Add Group Expense</h1>
         <div className="w-10"></div>
       </header>

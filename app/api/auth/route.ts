@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     }
 
     // safe JSON parse
-    let body: any;
+    let body: { email?: string; password?: string; type?: string; name?: string; phone?: string };
     try {
       body = await request.json();
     } catch (parseErr) {
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
         console.error("[api/auth] signup error:", error.message);
         // Map already-registered -> 409 so clients can show a friendly message
         const errMsg = error.message || "Signup failed";
-        const isAlready = /already/i.test(errMsg) || (error as any)?.status === 409;
+        const isAlready = /already/i.test(errMsg) || (error as { status?: number })?.status === 409;
         return NextResponse.json(
           { 
             error: errMsg, 
@@ -109,9 +109,10 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[api/auth] unhandled error:", err);
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
