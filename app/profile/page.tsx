@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Protected from '@/components/Protected';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
@@ -21,7 +22,7 @@ function NameEditor({ user, updateProfile }: { user: { name?: string; email?: st
         </>
       ) : (
         <div className="space-y-2">
-          <input value={name} onChange={(e) => setName(e.target.value)} className="w-full p-3 rounded border" style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)', color: 'var(--pk-text-primary)' }} />
+          <input value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} className="w-full p-3 rounded border" style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)', color: 'var(--pk-text-primary)' }} />
           <div className="flex gap-2">
             <button className="pk-button-primary flex-1" disabled={busy} onClick={async () => {
               setBusy(true);
@@ -47,9 +48,9 @@ export default function Profile() {
       <div className="min-h-dvh px-4 py-6 sm:px-6 md:px-8" style={{ background: 'var(--pk-bg)' }}>
         {/* Header */}
         <header className="flex items-center justify-between mb-6">
-          <a href="/" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
+          <Link href="/" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
             ←
-          </a>
+          </Link>
           <h1 className="text-xl font-bold" style={{ color: 'var(--pk-text-primary)' }}>{T('welcome.title')}</h1>
           <div className="flex items-center gap-2">
             <button onClick={() => setLang('hi')} className="p-2 rounded border" style={{ borderColor: 'var(--pk-border)' }}>हिं</button>

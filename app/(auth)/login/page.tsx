@@ -74,7 +74,7 @@ export default function Login() {
               className="w-full p-4 rounded-lg border"
               style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)', color: 'var(--pk-text-primary)' }}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -90,7 +90,7 @@ export default function Login() {
                 className="w-full p-4 pr-12 rounded-lg border"
                 style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)', color: 'var(--pk-text-primary)' }}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 required
               />
               <button type="button" className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2">
@@ -127,7 +127,7 @@ export default function Login() {
 
         {/* Sign Up Link */}
         <div className="text-center">
-          <span className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>Don't have an account? </span>
+          <span className="text-sm" style={{ color: 'var(--pk-text-secondary)' }}>Don&apos;t have an account? </span>
           <Link href="/signup" className="text-sm font-medium" style={{ color: 'var(--pk-orange)' }}>Sign Up</Link>
         </div>
       </main>

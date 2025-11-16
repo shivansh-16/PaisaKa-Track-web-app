@@ -4,9 +4,9 @@ export default function HiWelcome() {
   return (
     <>
         <header className="flex items-center p-2 m-2 ">
-          <a href="/welcome" className="p-2 rounded-full shadow-sm border px-3" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
+          <Link href="/welcome" className="p-2 rounded-full shadow-sm border px-3" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>
             ←
-          </a>
+          </Link>
         </header>
 
       <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center" style={{ background: 'var(--pk-bg)' }}>

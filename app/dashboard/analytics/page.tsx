@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useExpenses } from '@/context/ExpenseContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 
 function formatCurrency(v: number) {
   return `₹${v.toLocaleString('en-IN')}`;
@@ -76,13 +77,13 @@ export default function Analytics() {
   return (
     <div className="min-h-dvh px-4 py-6 sm:px-6 md:px-8" style={{ background: 'var(--pk-bg)' }}>
       <header className="flex items-center justify-between mb-6">
-        <a href="/" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>←</a>
+        <Link href="/" className="p-2 rounded-full shadow-sm border" style={{ background: 'var(--pk-card)', borderColor: 'var(--pk-border)' }}>←</Link>
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-bold" style={{ color: 'var(--pk-text-primary)' }}>{T('analytics.title')}</h1>
           <div className="text-sm text-slate-500">{user?.name ?? user?.email}</div>
         </div>
         <div className="flex items-center gap-2">
-          <select value={period} onChange={(e) => setPeriod(e.target.value as '30d'|'90d'|'1y'|'all')} className="p-2 rounded border" style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)' }}>
+          <select value={period} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPeriod(e.target.value as '30d'|'90d'|'1y'|'all')} className="p-2 rounded border" style={{ borderColor: 'var(--pk-border)', background: 'var(--pk-card)' }}>
             <option value="30d">30d</option>
             <option value="90d">90d</option>
             <option value="1y">1y</option>
